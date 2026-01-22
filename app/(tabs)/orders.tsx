@@ -9,7 +9,7 @@ import { Collapsible } from "@/components/ui/collapsible";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { Fonts } from "@/constants/theme";
 
-export default function ExploreScreen() {
+export default function OrdersScreen() {
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: "#D0D0D0", dark: "#353636" }}
@@ -29,7 +29,7 @@ export default function ExploreScreen() {
             fontFamily: Fonts.rounded,
           }}
         >
-          Explore
+          Orders
         </ThemedText>
       </ThemedView>
       <ThemedText>
@@ -40,7 +40,7 @@ export default function ExploreScreen() {
           This app has two screens:{" "}
           <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText>{" "}
           and{" "}
-          <ThemedText type="defaultSemiBold">app/(tabs)/explore.tsx</ThemedText>
+          <ThemedText type="defaultSemiBold">app/(tabs)/orders.tsx</ThemedText>
         </ThemedText>
         <ThemedText>
           The layout file in{" "}
