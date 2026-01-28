@@ -1,126 +1,323 @@
 import { Image } from "expo-image";
-import { Platform, StyleSheet } from "react-native";
+import { useState } from "react";
+import {
+  ActivityIndicator,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  View,
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { ExternalLink } from "@/components/external-link";
-import ParallaxScrollView from "@/components/parallax-scroll-view";
+import { AuthPrompt } from "@/components/auth-prompt";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
-import { Collapsible } from "@/components/ui/collapsible";
 import { IconSymbol } from "@/components/ui/icon-symbol";
-import { Fonts } from "@/constants/theme";
+import { Colors, Fonts } from "@/constants/theme";
+import { useColorScheme } from "@/hooks/use-color-scheme";
+import { signOut, useSession } from "@/lib/auth-client";
 
 export default function ProfileScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: "#D0D0D0", dark: "#353636" }}
-      headerImage={
-        <IconSymbol
-          size={310}
-          color="#808080"
-          name="chevron.left.forwardslash.chevron.right"
-          style={styles.headerImage}
-        />
-      }
-    >
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText
-          type="title"
-          style={{
-            fontFamily: Fonts.rounded,
-          }}
-        >
-          Profile
-        </ThemedText>
+  const { data: session, isPending } = useSession();
+  const colorScheme = useColorScheme() ?? "light";
+  const insets = useSafeAreaInsets();
+  const [showAuthPrompt, setShowAuthPrompt] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
+
+  const handleSignOut = async () => {
+    setIsSigningOut(true);
+    try {
+      await signOut();
+    } finally {
+      setIsSigningOut(false);
+    }
+  };
+
+  if (isPending) {
+    return (
+      <ThemedView style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={Colors[colorScheme].tint} />
       </ThemedView>
-      <ThemedText>
-        This app includes example code to help you get started.
-      </ThemedText>
-      <Collapsible title="File-based routing">
-        <ThemedText>
-          This app has two screens:{" "}
-          <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText>{" "}
-          and{" "}
-          <ThemedText type="defaultSemiBold">app/(tabs)/orders.tsx</ThemedText>
-        </ThemedText>
-        <ThemedText>
-          The layout file in{" "}
-          <ThemedText type="defaultSemiBold">app/(tabs)/_layout.tsx</ThemedText>{" "}
-          sets up the tab navigator.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/router/introduction">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Android, iOS, and web support">
-        <ThemedText>
-          You can open this project on Android, iOS, and the web. To open the
-          web version, press <ThemedText type="defaultSemiBold">w</ThemedText>{" "}
-          in the terminal running this project.
-        </ThemedText>
-      </Collapsible>
-      <Collapsible title="Images">
-        <ThemedText>
-          For static images, you can use the{" "}
-          <ThemedText type="defaultSemiBold">@2x</ThemedText> and{" "}
-          <ThemedText type="defaultSemiBold">@3x</ThemedText> suffixes to
-          provide files for different screen densities
-        </ThemedText>
-        <Image
-          source={require("@/assets/images/react-logo.png")}
-          style={{ width: 100, height: 100, alignSelf: "center" }}
-        />
-        <ExternalLink href="https://reactnative.dev/docs/images">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Light and dark mode components">
-        <ThemedText>
-          This template has light and dark mode support. The{" "}
-          <ThemedText type="defaultSemiBold">useColorScheme()</ThemedText> hook
-          lets you inspect what the user&apos;s current color scheme is, and so
-          you can adjust UI colors accordingly.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Animations">
-        <ThemedText>
-          This template includes an example of an animated component. The{" "}
-          <ThemedText type="defaultSemiBold">
-            components/HelloWave.tsx
-          </ThemedText>{" "}
-          component uses the powerful{" "}
-          <ThemedText type="defaultSemiBold" style={{ fontFamily: Fonts.mono }}>
-            react-native-reanimated
-          </ThemedText>{" "}
-          library to create a waving hand animation.
-        </ThemedText>
-        {Platform.select({
-          ios: (
-            <ThemedText>
-              The{" "}
-              <ThemedText type="defaultSemiBold">
-                components/ParallaxScrollView.tsx
-              </ThemedText>{" "}
-              component provides a parallax effect for the header image.
+    );
+  }
+
+  if (!session?.user) {
+    return (
+      <ThemedView style={[styles.container, { paddingTop: insets.top + 20 }]}>
+        <View style={styles.notSignedInContainer}>
+          <IconSymbol
+            name="person.crop.circle"
+            size={80}
+            color={Colors[colorScheme].icon}
+          />
+          <ThemedText style={styles.notSignedInTitle}>
+            Sign in to your account
+          </ThemedText>
+          <ThemedText style={styles.notSignedInSubtitle}>
+            View your orders, save favorites, and more
+          </ThemedText>
+          <Pressable
+            style={[
+              styles.signInButton,
+              { backgroundColor: Colors[colorScheme].tint },
+            ]}
+            onPress={() => setShowAuthPrompt(true)}
+          >
+            <ThemedText style={styles.signInButtonText}>Sign In</ThemedText>
+          </Pressable>
+        </View>
+
+        {showAuthPrompt && (
+          <AuthPrompt
+            action="follow"
+            onCancel={() => setShowAuthPrompt(false)}
+          />
+        )}
+      </ThemedView>
+    );
+  }
+
+  const user = session.user;
+
+  return (
+    <ScrollView
+      style={[
+        styles.container,
+        { backgroundColor: Colors[colorScheme].background },
+      ]}
+      contentContainerStyle={{ paddingTop: insets.top + 20, paddingBottom: 40 }}
+    >
+      <View style={styles.header}>
+        {user.image ? (
+          <Image source={{ uri: user.image }} style={styles.avatar} />
+        ) : (
+          <View
+            style={[
+              styles.avatarPlaceholder,
+              { backgroundColor: Colors[colorScheme].tint },
+            ]}
+          >
+            <ThemedText style={styles.avatarInitial}>
+              {user.name?.charAt(0).toUpperCase() ||
+                user.email?.charAt(0).toUpperCase()}
             </ThemedText>
-          ),
-        })}
-      </Collapsible>
-    </ParallaxScrollView>
+          </View>
+        )}
+        <ThemedText style={[styles.userName, { fontFamily: Fonts.rounded }]}>
+          {user.name || "User"}
+        </ThemedText>
+        <ThemedText style={styles.userEmail}>{user.email}</ThemedText>
+      </View>
+
+      <View style={styles.section}>
+        <ThemedText style={styles.sectionTitle}>Account</ThemedText>
+
+        <Pressable
+          style={[
+            styles.menuItem,
+            { borderBottomColor: Colors[colorScheme].icon + "20" },
+          ]}
+        >
+          <IconSymbol name="bag" size={22} color={Colors[colorScheme].icon} />
+          <ThemedText style={styles.menuItemText}>My Orders</ThemedText>
+          <IconSymbol
+            name="chevron.right"
+            size={16}
+            color={Colors[colorScheme].icon}
+          />
+        </Pressable>
+
+        <Pressable
+          style={[
+            styles.menuItem,
+            { borderBottomColor: Colors[colorScheme].icon + "20" },
+          ]}
+        >
+          <IconSymbol name="heart" size={22} color={Colors[colorScheme].icon} />
+          <ThemedText style={styles.menuItemText}>Saved Items</ThemedText>
+          <IconSymbol
+            name="chevron.right"
+            size={16}
+            color={Colors[colorScheme].icon}
+          />
+        </Pressable>
+
+        <Pressable
+          style={[
+            styles.menuItem,
+            { borderBottomColor: Colors[colorScheme].icon + "20" },
+          ]}
+        >
+          <IconSymbol
+            name="location"
+            size={22}
+            color={Colors[colorScheme].icon}
+          />
+          <ThemedText style={styles.menuItemText}>Addresses</ThemedText>
+          <IconSymbol
+            name="chevron.right"
+            size={16}
+            color={Colors[colorScheme].icon}
+          />
+        </Pressable>
+      </View>
+
+      <View style={styles.section}>
+        <ThemedText style={styles.sectionTitle}>Settings</ThemedText>
+
+        <Pressable
+          style={[
+            styles.menuItem,
+            { borderBottomColor: Colors[colorScheme].icon + "20" },
+          ]}
+        >
+          <IconSymbol name="bell" size={22} color={Colors[colorScheme].icon} />
+          <ThemedText style={styles.menuItemText}>Notifications</ThemedText>
+          <IconSymbol
+            name="chevron.right"
+            size={16}
+            color={Colors[colorScheme].icon}
+          />
+        </Pressable>
+
+        <Pressable
+          style={[
+            styles.menuItem,
+            { borderBottomColor: Colors[colorScheme].icon + "20" },
+          ]}
+        >
+          <IconSymbol
+            name="questionmark.circle"
+            size={22}
+            color={Colors[colorScheme].icon}
+          />
+          <ThemedText style={styles.menuItemText}>Help & Support</ThemedText>
+          <IconSymbol
+            name="chevron.right"
+            size={16}
+            color={Colors[colorScheme].icon}
+          />
+        </Pressable>
+      </View>
+
+      <Pressable
+        style={[styles.signOutButton, { borderColor: "#ff4444" }]}
+        onPress={handleSignOut}
+        disabled={isSigningOut}
+      >
+        {isSigningOut ? (
+          <ActivityIndicator size="small" color="#ff4444" />
+        ) : (
+          <ThemedText style={styles.signOutText}>Sign Out</ThemedText>
+        )}
+      </Pressable>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  headerImage: {
-    color: "#808080",
-    bottom: -90,
-    left: -35,
-    position: "absolute",
+  container: {
+    flex: 1,
   },
-  titleContainer: {
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  notSignedInContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 40,
+  },
+  notSignedInTitle: {
+    fontSize: 22,
+    fontWeight: "600",
+    marginTop: 20,
+    textAlign: "center",
+  },
+  notSignedInSubtitle: {
+    fontSize: 15,
+    opacity: 0.7,
+    marginTop: 8,
+    textAlign: "center",
+  },
+  signInButton: {
+    marginTop: 24,
+    paddingHorizontal: 40,
+    paddingVertical: 14,
+    borderRadius: 12,
+  },
+  signInButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  header: {
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingBottom: 24,
+  },
+  avatar: {
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+  },
+  avatarPlaceholder: {
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  avatarInitial: {
+    fontSize: 36,
+    fontWeight: "600",
+    color: "#fff",
+  },
+  userName: {
+    fontSize: 24,
+    fontWeight: "600",
+    marginTop: 16,
+  },
+  userEmail: {
+    fontSize: 15,
+    opacity: 0.7,
+    marginTop: 4,
+  },
+  section: {
+    paddingHorizontal: 20,
+    marginTop: 24,
+  },
+  sectionTitle: {
+    fontSize: 13,
+    fontWeight: "600",
+    opacity: 0.5,
+    textTransform: "uppercase",
+    marginBottom: 12,
+  },
+  menuItem: {
     flexDirection: "row",
-    gap: 8,
+    alignItems: "center",
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+  },
+  menuItemText: {
+    flex: 1,
+    fontSize: 16,
+    marginLeft: 14,
+  },
+  signOutButton: {
+    marginHorizontal: 20,
+    marginTop: 40,
+    paddingVertical: 14,
+    borderRadius: 12,
+    borderWidth: 1,
+    alignItems: "center",
+  },
+  signOutText: {
+    color: "#ff4444",
+    fontSize: 16,
+    fontWeight: "600",
   },
 });
