@@ -15,6 +15,7 @@ import { api } from "@/lib/api";
 import { useSession } from "@/lib/auth-client";
 import type { Product } from "@/types";
 import { AuthPrompt } from "../auth-prompt";
+import { formatPrice } from "@/lib/utils";
 
 type ProductCardProps = {
   product: Product;
@@ -59,14 +60,6 @@ export function ProductCard({ product, onLikeUpdate }: ProductCardProps) {
     } finally {
       setIsLiking(false);
     }
-  };
-
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat("en-RW", {
-      style: "currency",
-      currency: "RWF",
-      minimumFractionDigits: 0,
-    }).format(price);
   };
 
   return (
@@ -139,7 +132,7 @@ export function ProductCard({ product, onLikeUpdate }: ProductCardProps) {
                 </View>
               </View>
 
-              {(product.tags?.length ?? 0) > 0 && (
+              {/* {(product.tags?.length ?? 0) > 0 && (
                 <View style={styles.tags}>
                   {product.tags?.slice(0, 3).map((tag) => (
                     <View
@@ -153,7 +146,7 @@ export function ProductCard({ product, onLikeUpdate }: ProductCardProps) {
                     </View>
                   ))}
                 </View>
-              )}
+              )} */}
             </View>
           </Animated.View>
         </Pressable>
@@ -239,7 +232,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   price: {
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: "700",
     color: "#f97316",
   },

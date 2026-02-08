@@ -1,6 +1,7 @@
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Image } from "expo-image";
 import { Stack, useLocalSearchParams } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -20,7 +21,7 @@ import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useThemeColor } from "@/hooks/use-theme-color";
 import { api } from "@/lib/api";
 import { useSession } from "@/lib/auth-client";
-import type { MerchantDetail, Product } from "@/types";
+import type { Product } from "@/types";
 
 export default function MerchantDetailScreen() {
   const { slug } = useLocalSearchParams<{ slug: string }>();
@@ -29,20 +30,15 @@ export default function MerchantDetailScreen() {
   const insets = useSafeAreaInsets();
   const tintColor = useThemeColor({}, "tint");
 
-  const [merchant, setMerchant] = useState<MerchantDetail | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [showAuthPrompt, setShowAuthPrompt] = useState(false);
   const [isFollowLoading, setIsFollowLoading] = useState(false);
 
-  useEffect(() => {
-    if (!slug) return;
-
-    api.merchants
-      .bySlug(slug)
-      .then(setMerchant)
-      .catch(console.error)
-      .finally(() => setIsLoading(false));
-  }, [slug]);
+  const { data: merchant, isLoading } = useQuery({
+    queryKey: ["merchant", slug],
+    queryFn: () => api.merchants.bySlug(slug as string),
+    enabled: !!slug,
+    staleTime: 5 * 60 * 1000,
+  });
 
   const handleFollow = async () => {
     if (!merchant) return;
@@ -52,18 +48,20 @@ export default function MerchantDetailScreen() {
       return;
     }
 
+    const queryClient = useQueryClient();
     const wasFollowing = merchant.isFollowing;
-    setMerchant((prev) =>
-      prev
-        ? {
-            ...prev,
-            isFollowing: !wasFollowing,
-            followerCount: wasFollowing
-              ? prev.followerCount - 1
-              : prev.followerCount + 1,
-          }
-        : null,
-    );
+
+    // Optimistic update
+    queryClient.setQueryData(["merchant", slug], (oldData: any) => {
+      if (!oldData) return oldData;
+      return {
+        ...oldData,
+        isFollowing: !wasFollowing,
+        followerCount: wasFollowing
+          ? oldData.followerCount - 1
+          : oldData.followerCount + 1,
+      };
+    });
 
     setIsFollowLoading(true);
     try {
@@ -74,45 +72,43 @@ export default function MerchantDetailScreen() {
       }
     } catch (error) {
       console.error("Failed to update follow status:", error);
-      setMerchant((prev) =>
-        prev
-          ? {
-              ...prev,
-              isFollowing: wasFollowing,
-              followerCount: wasFollowing
-                ? prev.followerCount + 1
-                : prev.followerCount - 1,
-            }
-          : null,
-      );
+      // Revert optimistic update
+      queryClient.setQueryData(["merchant", slug], (oldData: any) => {
+        if (!oldData) return oldData;
+        return {
+          ...oldData,
+          isFollowing: wasFollowing,
+          followerCount: wasFollowing
+            ? oldData.followerCount + 1
+            : oldData.followerCount - 1,
+        };
+      });
     } finally {
       setIsFollowLoading(false);
     }
   };
 
-  const handleProductLikeUpdate = useCallback(
-    (productSlug: string, isLiked: boolean, likesCount: number) => {
-      setMerchant((prev) =>
-        prev
-          ? {
-              ...prev,
-              products: prev.products.map((p) =>
-                p.slug === productSlug ? { ...p, isLiked, likesCount } : p,
-              ),
-            }
-          : null,
-      );
-    },
-    [],
-  );
+  const handleProductLikeUpdate = (
+    productSlug: string,
+    isLiked: boolean,
+    likesCount: number,
+  ) => {
+    const queryClient = useQueryClient();
+    queryClient.setQueryData(["merchant", slug], (oldData: any) => {
+      if (!oldData) return oldData;
+      return {
+        ...oldData,
+        products: oldData.products.map((p: Product) =>
+          p.slug === productSlug ? { ...p, isLiked, likesCount } : p,
+        ),
+      };
+    });
+  };
 
-  const renderProduct = useCallback(
-    ({ item }: { item: Product }) => (
-      <View style={styles.productWrapper}>
-        <ProductCard product={item} onLikeUpdate={handleProductLikeUpdate} />
-      </View>
-    ),
-    [handleProductLikeUpdate],
+  const renderProduct = ({ item }: { item: Product }) => (
+    <View style={styles.productWrapper}>
+      <ProductCard product={item} onLikeUpdate={handleProductLikeUpdate} />
+    </View>
   );
 
   if (isLoading) {
@@ -170,7 +166,9 @@ export default function MerchantDetailScreen() {
                   <ThemedText type="defaultSemiBold">
                     {merchant.followerCount}
                   </ThemedText>
-                  <ThemedText style={styles.statLabel}>Followers</ThemedText>
+                  <ThemedText style={styles.statLabel}>
+                    Follower{merchant.followerCount <= 1 ? "" : "s"}
+                  </ThemedText>
                 </View>
                 <View style={styles.statDivider} />
                 <View style={styles.stat}>

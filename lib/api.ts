@@ -63,47 +63,29 @@ async function fetchAPI<T>(
 
 export const api = {
   products: {
-    list: (params?: {
-      search?: string;
+    // list: (params?: {
+    //   search?: string;
 
-      tags?: string;
+    //   tags?: string;
 
-      status?: string;
+    //   status?: string;
 
-      sortBy?: "newest" | "oldest" | "price_low" | "price_high" | "popular";
-
-      limit?: number;
-
-      offset?: number;
-    }) => fetchAPI<ProductsResponse>("/products", { params }),
+    //   sortBy?: "newest" | "oldest" | "price_low" | "price_high" | "popular";
+    // }) => fetchAPI<ProductsResponse>("/products", { params }),
 
     featured: () => fetchAPI<FeaturedResponse>("/products/featured"),
 
     bySlug: (slug: string) => fetchAPI<Product>(`/products/${slug}`),
 
-    byCategory: (
-      categorySlug: string,
+    byCategory: (categorySlug: string) =>
+      fetchAPI<ProductsResponse>(`/products/category/${categorySlug}`),
 
-      params?: { limit?: number; offset?: number },
-    ) =>
-      fetchAPI<ProductsResponse>(`/products/category/${categorySlug}`, {
-        params,
-      }),
+    byStore: (organizationId: string) =>
+      fetchAPI<ProductsResponse>(`/products/store/${organizationId}`),
 
-    byStore: (
-      organizationId: string,
+    forYou: () => fetchAPI<ProductsResponse>("/products/for-you"),
 
-      params?: { limit?: number; offset?: number },
-    ) =>
-      fetchAPI<ProductsResponse>(`/products/store/${organizationId}`, {
-        params,
-      }),
-
-    forYou: (params?: { limit?: number; offset?: number }) =>
-      fetchAPI<ProductsResponse>("/products/for-you", { params }),
-
-    following: (params?: { limit?: number; offset?: number }) =>
-      fetchAPI<ProductsResponse>("/products/following", { params }),
+    following: () => fetchAPI<ProductsResponse>("/products/following"),
 
     like: (slug: string) =>
       fetchAPI<ProductLikeResponse>(`/products/${slug}/like`, {
@@ -130,15 +112,21 @@ export const api = {
   },
 
   merchants: {
-    list: (params?: { limit?: number; offset?: number; search?: string }) =>
+    list: (params?: { search?: string }) =>
       fetchAPI<MerchantsResponse>("/merchants", { params }),
 
     bySlug: (slug: string) => fetchAPI<MerchantDetail>(`/merchants/${slug}`),
 
     follow: (slug: string) =>
-      fetchAPI(`/merchants/${slug}/follow`, { method: "POST" }),
+      fetchAPI(`/merchants/${slug}/follow`, {
+        method: "POST",
+        body: { revalidateTargetPath: "/" },
+      }),
 
     unfollow: (slug: string) =>
-      fetchAPI(`/merchants/${slug}/follow`, { method: "DELETE" }),
+      fetchAPI(`/merchants/${slug}/follow`, {
+        method: "DELETE",
+        body: { revalidateTargetPath: "/" },
+      }),
   },
 };
