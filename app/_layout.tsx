@@ -12,6 +12,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { getPreferences } from "@/stores/preferences";
+import { QueryProvider } from "@/components/providers/query-client-provider";
 
 export const unstable_settings = {
   anchor: "(tabs)",
@@ -47,38 +48,42 @@ export default function RootLayout() {
 
   return (
     <SafeAreaProvider>
-      <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen
-            name="onboarding"
-            options={{ headerShown: false, animation: "fade" }}
-          />
-          <Stack.Screen
-            name="product/[slug]"
-            options={{
-              headerShown: true,
-              headerBackTitle: "Back",
-              headerTransparent: true,
-              headerTitle: "",
-            }}
-          />
-          <Stack.Screen
-            name="merchant/[slug]"
-            options={{
-              headerShown: true,
-              headerBackTitle: "Back",
-              headerTransparent: true,
-              headerTitle: "",
-            }}
-          />
-          <Stack.Screen
-            name="modal"
-            options={{ presentation: "modal", title: "Modal" }}
-          />
-        </Stack>
-        <StatusBar style="auto" />
-      </ThemeProvider>
+      <QueryProvider>
+        <ThemeProvider
+          value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+        >
+          <Stack>
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen
+              name="onboarding"
+              options={{ headerShown: false, animation: "fade" }}
+            />
+            <Stack.Screen
+              name="product/[slug]"
+              options={{
+                headerShown: true,
+                headerBackTitle: "Back",
+                headerTransparent: true,
+                headerTitle: "",
+              }}
+            />
+            <Stack.Screen
+              name="merchant/[slug]"
+              options={{
+                headerShown: true,
+                headerBackTitle: "Back",
+                headerTransparent: true,
+                headerTitle: "",
+              }}
+            />
+            <Stack.Screen
+              name="modal"
+              options={{ presentation: "modal", title: "Modal" }}
+            />
+          </Stack>
+          <StatusBar style="auto" />
+        </ThemeProvider>
+      </QueryProvider>
     </SafeAreaProvider>
   );
 }

@@ -1,6 +1,7 @@
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Image } from "expo-image";
 import { router, Stack, useLocalSearchParams } from "expo-router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -22,30 +23,25 @@ import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { api } from "@/lib/api";
 import { useSession } from "@/lib/auth-client";
-import type { Product } from "@/types";
+import { formatPrice } from "@/lib/utils";
 
 export default function ProductDetailScreen() {
   const { slug } = useLocalSearchParams<{ slug: string }>();
   const colorScheme = useColorScheme() ?? "light";
   const { data: session } = useSession();
 
-  const [product, setProduct] = useState<Product | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [showAuthPrompt, setShowAuthPrompt] = useState(false);
   const [isLiking, setIsLiking] = useState(false);
 
   const likeScale = useSharedValue(1);
 
-  useEffect(() => {
-    if (!slug) return;
-
-    api.products
-      .bySlug(slug)
-      .then(setProduct)
-      .catch(console.error)
-      .finally(() => setIsLoading(false));
-  }, [slug]);
+  const { data: product, isLoading } = useQuery({
+    queryKey: ["product", slug],
+    queryFn: () => api.products.bySlug(slug as string),
+    enabled: !!slug,
+    staleTime: 5 * 60 * 1000,
+  });
 
   const handleLike = async () => {
     if (!product || isLiking) return;
@@ -59,16 +55,22 @@ export default function ProductDetailScreen() {
       likeScale.value = withSpring(1);
     });
 
+    const queryClient = useQueryClient();
     const previousState = {
       isLiked: product.isLiked,
       likesCount: product.likesCount,
     };
-    setProduct({
-      ...product,
-      isLiked: !product.isLiked,
-      likesCount: product.isLiked
-        ? product.likesCount - 1
-        : product.likesCount + 1,
+
+    // Optimistic update
+    queryClient.setQueryData(["product", slug], (oldData: any) => {
+      if (!oldData) return oldData;
+      return {
+        ...oldData,
+        isLiked: !oldData.isLiked,
+        likesCount: oldData.isLiked
+          ? oldData.likesCount - 1
+          : oldData.likesCount + 1,
+      };
     });
 
     setIsLiking(true);
@@ -77,14 +79,22 @@ export default function ProductDetailScreen() {
         ? await api.products.unlike(product.slug)
         : await api.products.like(product.slug);
 
-      setProduct((prev) =>
-        prev
-          ? { ...prev, isLiked: result.liked, likesCount: result.likesCount }
-          : prev,
-      );
+      // Update with server response
+      queryClient.setQueryData(["product", slug], (oldData: any) => {
+        if (!oldData) return oldData;
+        return {
+          ...oldData,
+          isLiked: result.liked,
+          likesCount: result.likesCount,
+        };
+      });
     } catch (error) {
       console.error("Failed to toggle like:", error);
-      setProduct((prev) => (prev ? { ...prev, ...previousState } : prev));
+      // Revert optimistic update
+      queryClient.setQueryData(["product", slug], (oldData: any) => {
+        if (!oldData) return oldData;
+        return { ...oldData, ...previousState };
+      });
     } finally {
       setIsLiking(false);
     }
@@ -102,13 +112,6 @@ export default function ProductDetailScreen() {
     // TODO: Implement actual cart functionality
     console.log("Adding to cart:", product?.name);
   };
-
-  const formatPrice = (price: number) =>
-    new Intl.NumberFormat("en-RW", {
-      style: "currency",
-      currency: "RWF",
-      minimumFractionDigits: 0,
-    }).format(price);
 
   if (isLoading) {
     return (
@@ -225,7 +228,7 @@ export default function ProductDetailScreen() {
             </ThemedText>
             <View style={styles.stats}>
               <ThemedText style={styles.likes}>
-                ♥ {product.likesCount} likes
+                ♥ {product.likesCount} like{product.likesCount <= 1 ? "" : "s"}
               </ThemedText>
             </View>
           </View>

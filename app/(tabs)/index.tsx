@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import {
   ActivityIndicator,
-  Dimensions,
   RefreshControl,
   StyleSheet,
   Text,
@@ -24,7 +24,7 @@ import { api } from "@/lib/api";
 import type { Product } from "@/types";
 
 const HEADER_HEIGHT = 200;
-const { width: SCREEN_WIDTH } = Dimensions.get("window");
+// const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 export default function HomeScreen() {
   const colorScheme = useColorScheme() ?? "light";
@@ -32,79 +32,37 @@ export default function HomeScreen() {
   const scrollOffset = useScrollOffset(scrollRef);
 
   const [activeTab, setActiveTab] = useState<FeedTab>("for-you");
-  const [products, setProducts] = useState<Product[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const [offset, setOffset] = useState(0);
-  const [hasMore, setHasMore] = useState(true);
 
-  const fetchProducts = useCallback(
-    async (refresh = false) => {
-      const currentOffset = refresh ? 0 : offset;
+  const { data, isLoading, refetch } = useQuery({
+    queryKey: ["products", activeTab],
+    queryFn: () =>
+      activeTab === "for-you"
+        ? api.products.forYou()
+        : api.products.following(),
+    staleTime: 5 * 60 * 1000, // 5 minutes cache
+  });
 
-      try {
-        const response =
-          activeTab === "for-you"
-            ? await api.products.list({
-                sortBy: "popular",
-                limit: 10,
-                offset: currentOffset,
-              })
-            : await api.products.following({
-                limit: 10,
-                offset: currentOffset,
-              });
+  const products = data?.products ?? [];
 
-        const newProducts = response.products;
-
-        if (refresh) {
-          setProducts(newProducts);
-          setOffset(10);
-        } else {
-          setProducts((prev) => [...prev, ...newProducts]);
-          setOffset((prev) => prev + 10);
-        }
-
-        setHasMore(newProducts.length === 10);
-      } catch (error) {
-        console.error("Failed to fetch products:", error);
-      } finally {
-        setIsLoading(false);
-        setIsRefreshing(false);
-      }
-    },
-    [activeTab, offset],
-  );
-
-  useEffect(() => {
-    setIsLoading(true);
-    setProducts([]);
-    setOffset(0);
-    setHasMore(true);
-    fetchProducts(true);
-  }, [activeTab]);
-
-  const handleRefresh = () => {
-    setIsRefreshing(true);
-    fetchProducts(true);
-  };
-
-  const handleLoadMore = () => {
-    if (hasMore && !isLoading) {
-      fetchProducts(false);
-    }
-  };
-
-  const handleLikeUpdate = useCallback(
-    (slug: string, liked: boolean, likesCount: number) => {
-      setProducts((prev) =>
-        prev.map((p) =>
-          p.slug === slug ? { ...p, isLiked: liked, likesCount } : p,
+  const handleLikeUpdate = (
+    slug: string,
+    liked: boolean,
+    likesCount: number,
+  ) => {
+    // Update local data optimistically
+    const queryClient = useQueryClient();
+    queryClient.setQueryData(["products", activeTab], (oldData: any) => {
+      if (!oldData) return oldData;
+      return {
+        ...oldData,
+        products: oldData.products.map((product: Product) =>
+          product.slug === slug
+            ? { ...product, isLiked: liked, likesCount }
+            : product,
         ),
-      );
-    },
-    [],
-  );
+      };
+    });
+  };
 
   const headerAnimatedStyle = useAnimatedStyle(() => ({
     transform: [
@@ -125,14 +83,11 @@ export default function HomeScreen() {
     ],
   }));
 
-  const renderItem = useCallback(
-    ({ item }: { item: Product }) => (
-      <ProductCard product={item} onLikeUpdate={handleLikeUpdate} />
-    ),
-    [handleLikeUpdate],
+  const renderItem = ({ item }: { item: Product }) => (
+    <ProductCard product={item} onLikeUpdate={handleLikeUpdate} />
   );
 
-  const keyExtractor = useCallback((item: Product) => item.id, []);
+  const keyExtractor = (item: Product) => item.id;
 
   const renderHeader = () => (
     <View>
@@ -176,15 +131,6 @@ export default function HomeScreen() {
     );
   };
 
-  const renderFooter = () => {
-    if (!hasMore || isLoading) return null;
-    return (
-      <View style={styles.footer}>
-        <ActivityIndicator color={Colors[colorScheme].tint} />
-      </View>
-    );
-  };
-
   return (
     <ThemedView style={styles.container}>
       <Animated.FlatList
@@ -194,16 +140,16 @@ export default function HomeScreen() {
         keyExtractor={keyExtractor}
         ListHeaderComponent={renderHeader}
         ListEmptyComponent={renderEmpty}
-        ListFooterComponent={renderFooter}
-        onEndReached={handleLoadMore}
-        onEndReachedThreshold={0.5}
+        ListFooterComponent={null}
+        onEndReached={undefined}
+        onEndReachedThreshold={undefined}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.content}
         scrollEventThrottle={16}
         refreshControl={
           <RefreshControl
-            refreshing={isRefreshing}
-            onRefresh={handleRefresh}
+            refreshing={isLoading}
+            onRefresh={() => refetch()}
             tintColor={Colors[colorScheme].tint}
             progressViewOffset={HEADER_HEIGHT}
           />

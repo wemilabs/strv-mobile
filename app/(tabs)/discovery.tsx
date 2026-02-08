@@ -1,6 +1,7 @@
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Image } from "expo-image";
 import { router } from "expo-router";
-import { memo, useCallback, useEffect, useState } from "react";
+import { useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -34,7 +35,7 @@ type MerchantCardProps = {
   onCardPress: (slug: string) => void;
 };
 
-const MerchantCard = memo(function MerchantCard({
+const MerchantCard = function MerchantCard({
   id,
   slug,
   name,
@@ -56,13 +57,13 @@ const MerchantCard = memo(function MerchantCard({
   );
   const tintColor = useThemeColor({}, "tint");
 
-  const handleFollowPress = useCallback(() => {
+  const handleFollowPress = () => {
     onFollowPress(id, slug);
-  }, [id, slug, onFollowPress]);
+  };
 
-  const handleCardPress = useCallback(() => {
+  const handleCardPress = () => {
     onCardPress(slug);
-  }, [slug, onCardPress]);
+  };
 
   return (
     <Pressable
@@ -105,12 +106,7 @@ const MerchantCard = memo(function MerchantCard({
               pressed && { opacity: 0.8 },
             ]}
           >
-            <ThemedText
-              style={[
-                styles.followButtonText,
-                { color: isFollowing ? "#fff" : tintColor },
-              ]}
-            >
+            <ThemedText style={[styles.followButtonText, { color: tintColor }]}>
               {isFollowing ? "Unfollow" : "Follow"}
             </ThemedText>
           </Pressable>
@@ -132,7 +128,7 @@ const MerchantCard = memo(function MerchantCard({
       </View>
     </Pressable>
   );
-});
+};
 
 const keyExtractor = (item: Merchant) => item.id;
 const ItemSeparator = () => <View style={styles.separator} />;
@@ -140,93 +136,80 @@ const ItemSeparator = () => <View style={styles.separator} />;
 export default function DiscoveryScreen() {
   const insets = useSafeAreaInsets();
   const { data: session } = useSession();
-  const [merchants, setMerchants] = useState<Merchant[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isRefreshing, setIsRefreshing] = useState(false);
   const [showAuthPrompt, setShowAuthPrompt] = useState(false);
 
-  const fetchMerchants = useCallback(async (isRefresh = false) => {
-    if (isRefresh) setIsRefreshing(true);
-    else setIsLoading(true);
+  const { data, isLoading, refetch } = useQuery({
+    queryKey: ["merchants"],
+    queryFn: () => api.merchants.list(),
+    staleTime: 5 * 60 * 1000,
+  });
 
-    try {
-      const data = await api.merchants.list();
-      console.log(
-        "Merchants data:",
-        JSON.stringify(data.merchants.slice(0, 2), null, 2),
-      );
-      setMerchants(data.merchants);
-    } catch (error) {
-      console.error("Failed to fetch merchants:", error);
-    } finally {
-      setIsLoading(false);
-      setIsRefreshing(false);
+  const merchants = data?.merchants ?? [];
+
+  const handleFollowPress = async (
+    merchantId: string,
+    merchantSlug: string,
+  ) => {
+    if (!session) {
+      setShowAuthPrompt(true);
+      return;
     }
-  }, []);
 
-  useEffect(() => {
-    fetchMerchants();
-  }, [fetchMerchants]);
+    const queryClient = useQueryClient();
+    const merchant = merchants.find((m) => m.id === merchantId);
+    if (!merchant) return;
 
-  const handleRefresh = useCallback(() => {
-    fetchMerchants(true);
-  }, [fetchMerchants]);
+    const wasFollowing = merchant.isFollowing;
 
-  const handleFollowPress = useCallback(
-    async (merchantId: string, merchantSlug: string) => {
-      if (!session) {
-        setShowAuthPrompt(true);
-        return;
-      }
-
-      const merchant = merchants.find((m) => m.id === merchantId);
-      if (!merchant) return;
-
-      const wasFollowing = merchant.isFollowing;
-      setMerchants((prev) =>
-        prev.map((m) =>
+    // Optimistic update
+    queryClient.setQueryData(["merchants"], (oldData: any) => {
+      if (!oldData) return oldData;
+      return {
+        ...oldData,
+        merchants: oldData.merchants.map((m: Merchant) =>
           m.id === merchantId ? { ...m, isFollowing: !wasFollowing } : m,
         ),
-      );
+      };
+    });
 
-      try {
-        if (wasFollowing) {
-          await api.merchants.unfollow(merchantSlug);
-        } else {
-          await api.merchants.follow(merchantSlug);
-        }
-      } catch (error) {
-        console.error("Failed to update follow status:", error);
-        setMerchants((prev) =>
-          prev.map((m) =>
+    try {
+      if (wasFollowing) {
+        await api.merchants.unfollow(merchantSlug);
+      } else {
+        await api.merchants.follow(merchantSlug);
+      }
+    } catch (error) {
+      console.error("Failed to update follow status:", error);
+      // Revert optimistic update
+      queryClient.setQueryData(["merchants"], (oldData: any) => {
+        if (!oldData) return oldData;
+        return {
+          ...oldData,
+          merchants: oldData.merchants.map((m: Merchant) =>
             m.id === merchantId ? { ...m, isFollowing: wasFollowing } : m,
           ),
-        );
-      }
-    },
-    [merchants, session],
-  );
+        };
+      });
+    }
+  };
 
-  const handleCardPress = useCallback((slug: string) => {
+  const handleCardPress = (slug: string) => {
     router.push({ pathname: "/merchant/[slug]", params: { slug } });
-  }, []);
+  };
 
-  const renderItem = useCallback(
-    ({ item }: { item: Merchant }) => (
-      <MerchantCard
-        id={item.id}
-        slug={item.slug}
-        name={item.name}
-        logo={item.logo}
-        category={item.category}
-        rating={item.rating}
-        productsCount={item.productsCount}
-        isFollowing={item.isFollowing ?? false}
-        onFollowPress={handleFollowPress}
-        onCardPress={handleCardPress}
-      />
-    ),
-    [handleFollowPress, handleCardPress],
+  const renderItem = ({ item }: { item: Merchant }) => (
+    <MerchantCard
+      id={item.id}
+      slug={item.slug}
+      name={item.name}
+      logo={item.logo}
+      category={item.category}
+      rating={item.rating}
+      productsCount={item.productsCount}
+      isFollowing={item.isFollowing ?? false}
+      onFollowPress={handleFollowPress}
+      onCardPress={handleCardPress}
+    />
   );
 
   return (
@@ -252,8 +235,8 @@ export default function DiscoveryScreen() {
           ItemSeparatorComponent={ItemSeparator}
           refreshControl={
             <RefreshControl
-              refreshing={isRefreshing}
-              onRefresh={handleRefresh}
+              refreshing={isLoading}
+              onRefresh={() => refetch()}
             />
           }
         />
