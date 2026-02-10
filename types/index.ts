@@ -43,6 +43,8 @@ export type Product = {
   organization?: Organization;
   tags?: Tag[];
   isLiked: boolean;
+  currentStock?: number;
+  inventoryEnabled?: boolean;
 };
 
 export type CategoryConfig = {
@@ -109,4 +111,54 @@ export type MerchantDetail = {
   productCount: number;
   isFollowing: boolean;
   products: Product[];
+};
+
+export type OrderListItem = {
+  id: string;
+  createdAt: string;
+  status: string;
+  totalPrice: string;
+  isPaid?: boolean;
+  paidAt?: string | null;
+  organization: {
+    id: string;
+    name: string;
+    slug: string;
+    logo: string | null;
+  };
+  orderItems: Array<{
+    id: string;
+    quantity: number;
+    product: {
+      id: string;
+      name: string;
+      imageUrls: string[] | null;
+      price: number;
+    };
+  }>;
+};
+
+export type OrderDetail = OrderListItem & {
+  notes: string | null;
+  deliveryLocation: string | null;
+  orderItems: Array<{
+    id: string;
+    quantity: number;
+    notes: string | null;
+    priceAtOrder: string;
+    subtotal: string;
+    product: {
+      id: string;
+      name: string;
+      imageUrls: string[] | null;
+      price: number;
+      description: string | null;
+    };
+  }>;
+  user?: {
+    id: string;
+    name: string | null;
+    email: string;
+    image: string | null;
+  };
 };

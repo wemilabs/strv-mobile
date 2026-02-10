@@ -194,7 +194,7 @@ export default function DiscoveryScreen() {
   };
 
   const handleCardPress = (slug: string) => {
-    router.push({ pathname: "/merchant/[slug]", params: { slug } });
+    router.push({ pathname: "/store/[slug]", params: { slug } });
   };
 
   const renderItem = ({ item }: { item: Merchant }) => (
