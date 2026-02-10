@@ -216,7 +216,7 @@ export default function DiscoveryScreen() {
     <ThemedView style={styles.container}>
       <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
         <ThemedText type="title" style={{ fontFamily: Fonts.rounded }}>
-          Discover
+          Discovery
         </ThemedText>
         <ThemedText style={styles.subtitle}>Explore stores</ThemedText>
       </View>
@@ -255,11 +255,11 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingHorizontal: 20,
-    paddingBottom: 16,
+    paddingBottom: 18,
+    marginTop: 24,
   },
   subtitle: {
-    fontSize: 15,
-    opacity: 0.6,
+    opacity: 0.7,
     marginTop: 4,
   },
   listContent: {
