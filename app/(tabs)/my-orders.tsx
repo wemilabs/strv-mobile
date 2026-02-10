@@ -156,7 +156,7 @@ const styles = StyleSheet.create({
   header: {
     paddingHorizontal: 20,
     paddingBottom: 18,
-    marginTop: 52,
+    marginTop: 24,
   },
   subtitle: {
     opacity: 0.7,

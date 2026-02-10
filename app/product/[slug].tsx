@@ -151,7 +151,7 @@ export default function ProductDetailScreen() {
 
   return (
     <ThemedView style={styles.container}>
-      <Stack.Screen
+      {/* <Stack.Screen
         options={{
           title: "",
           headerTransparent: true,
@@ -165,7 +165,7 @@ export default function ProductDetailScreen() {
             </Pressable>
           ),
         }}
-      />
+      /> */}
 
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -181,6 +181,13 @@ export default function ProductDetailScreen() {
                 transition={200}
               />
             )}
+            {/* <Pressable onPress={handleLike}>
+              <Animated.View style={likeAnimatedStyle}>
+                <ThemedText style={styles.headerLike}>
+                  {product.isLiked ? "♥" : "♡"}
+                </ThemedText>
+              </Animated.View>
+            </Pressable> */}
           </View>
 
           {(product.imageUrls?.length ?? 0) > 1 && (
@@ -248,7 +255,7 @@ export default function ProductDetailScreen() {
             </ThemedText>
             <View style={styles.stats}>
               <ThemedText style={styles.likes}>
-                ♥ {product.likesCount} like{product.likesCount <= 1 ? "" : "s"}
+                ♥ {product.likesCount}
               </ThemedText>
             </View>
           </View>
@@ -382,6 +389,7 @@ const styles = StyleSheet.create({
   },
   price: {
     fontSize: 28,
+    lineHeight: 36,
     fontWeight: "700",
     color: "#f97316",
   },
@@ -449,5 +457,7 @@ const styles = StyleSheet.create({
   },
   headerLike: {
     fontSize: 24,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });

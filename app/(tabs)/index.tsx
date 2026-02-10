@@ -22,6 +22,7 @@ import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { api } from "@/lib/api";
 import type { Product } from "@/types";
+import { Link } from "expo-router";
 
 const HEADER_HEIGHT = 200;
 // const { width: SCREEN_WIDTH } = Dimensions.get("window");
