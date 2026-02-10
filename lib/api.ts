@@ -2,6 +2,8 @@ import type {
   FeaturedResponse,
   MerchantDetail,
   MerchantsResponse,
+  OrderDetail,
+  OrderListItem,
   Product,
   ProductLikeResponse,
   ProductsResponse,
@@ -56,12 +58,79 @@ async function fetchAPI<T>(
     body: body ? JSON.stringify(body) : undefined,
   });
 
-  if (!response.ok) throw new Error(`API error: ${response.status}`);
+  const contentType = response.headers.get("content-type") ?? "";
+  const isJson = contentType.includes("application/json");
 
-  return response.json();
+  if (!response.ok) {
+    if (isJson) {
+      try {
+        const payload = (await response.json()) as { error?: string };
+        const message = payload?.error || `API error: ${response.status}`;
+        throw new Error(message);
+      } catch {
+        throw new Error(`API error: ${response.status}`);
+      }
+    }
+
+    throw new Error(`API error: ${response.status}`);
+  }
+
+  if (!isJson) {
+    throw new Error("Unexpected API response");
+  }
+
+  return response.json() as Promise<T>;
 }
 
 export const api = {
+  orders: {
+    list: () =>
+      fetchAPI<{
+        orders: OrderListItem[];
+        total: number;
+      }>("/orders"),
+
+    byId: (id: string) => fetchAPI<OrderDetail>(`/orders/${id}`),
+
+    create: (data: {
+      items: Array<{ productId: string; quantity: number; notes?: string }>;
+      notes?: string;
+      deliveryLocation?: string;
+    }) =>
+      fetchAPI<{
+        orderId: string;
+        orderNumber: number;
+        totalPrice: string;
+        deliveryLocation: string | null;
+        stockWarnings?: string[];
+      }>("/orders", {
+        method: "POST",
+        body: data,
+      }),
+
+    cancel: (id: string) =>
+      fetchAPI<{ message: string }>(`/orders/${id}/cancel`, {
+        method: "POST",
+      }),
+
+    pay: (id: string, data: { phoneNumber: string }) =>
+      fetchAPI<{
+        paymentId: string;
+        paypackRef: string;
+        amount: number;
+        status: string;
+        message: string;
+      }>(`/orders/${id}/pay`, {
+        method: "POST",
+        body: data,
+      }),
+
+    paymentStatus: (id: string, paypackRef: string) =>
+      fetchAPI<{ status: string }>(`/orders/${id}/payment-status`, {
+        params: { ref: paypackRef },
+      }),
+  },
+
   products: {
     // list: (params?: {
     //   search?: string;
@@ -86,6 +155,18 @@ export const api = {
     forYou: () => fetchAPI<ProductsResponse>("/products/for-you"),
 
     following: () => fetchAPI<ProductsResponse>("/products/following"),
+
+    byIds: (ids: string[], organizationId: string) =>
+      fetchAPI<{
+        ok: boolean;
+        stocks: Array<{
+          id: string;
+          currentStock: number;
+          inventoryEnabled: boolean;
+        }>;
+      }>("/products/stock", {
+        params: { ids: ids.join(","), organizationId },
+      }),
 
     like: (slug: string) =>
       fetchAPI<ProductLikeResponse>(`/products/${slug}/like`, {

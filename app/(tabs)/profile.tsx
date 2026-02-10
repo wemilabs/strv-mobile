@@ -1,4 +1,5 @@
 import { Image } from "expo-image";
+import { router } from "expo-router";
 import { useState } from "react";
 import {
   ActivityIndicator,
@@ -117,6 +118,7 @@ export default function ProfileScreen() {
             styles.menuItem,
             { borderBottomColor: Colors[colorScheme].icon + "20" },
           ]}
+          onPress={() => router.push("/my-orders")}
         >
           <IconSymbol name="bag" size={22} color={Colors[colorScheme].icon} />
           <ThemedText style={styles.menuItemText}>My Orders</ThemedText>

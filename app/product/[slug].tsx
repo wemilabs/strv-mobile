@@ -4,6 +4,7 @@ import { router, Stack, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -23,6 +24,7 @@ import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { api } from "@/lib/api";
 import { useSession } from "@/lib/auth-client";
+import { useCartStore } from "@/lib/cart-store";
 import { formatPrice } from "@/lib/utils";
 
 export default function ProductDetailScreen() {
@@ -104,13 +106,31 @@ export default function ProductDetailScreen() {
     transform: [{ scale: likeScale.value }],
   }));
 
+  const { addItem } = useCartStore();
+
   const handleAddToCart = () => {
     if (!session) {
       setShowAuthPrompt(true);
       return;
     }
-    // TODO: Implement actual cart functionality
-    console.log("Adding to cart:", product?.name);
+
+    if (!product) return;
+
+    try {
+      addItem({
+        productId: product.id,
+        productName: product.name,
+        productSlug: product.slug,
+        productImages: product.imageUrls ?? null,
+        organizationId: product.organizationId,
+        price: product.price,
+        category: product.category,
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        Alert.alert("Stock limit", error.message);
+      }
+    }
   };
 
   if (isLoading) {

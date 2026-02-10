@@ -10,9 +10,9 @@ import React, { useEffect, useRef, useState } from "react";
 import "react-native-reanimated";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
+import { QueryProvider } from "@/components/providers/query-client-provider";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { getPreferences } from "@/stores/preferences";
-import { QueryProvider } from "@/components/providers/query-client-provider";
 
 export const unstable_settings = {
   anchor: "(tabs)",
@@ -42,9 +42,7 @@ export default function RootLayout() {
     checkOnboardingStatus();
   }, []);
 
-  if (!isReady) {
-    return null;
-  }
+  if (!isReady) return null;
 
   return (
     <SafeAreaProvider>
@@ -59,6 +57,24 @@ export default function RootLayout() {
               options={{ headerShown: false, animation: "fade" }}
             />
             <Stack.Screen
+              name="my-orders"
+              options={{
+                headerShown: true,
+                headerBackTitle: "Back",
+                headerTransparent: true,
+                headerTitle: "",
+              }}
+            />
+            <Stack.Screen
+              name="my-orders/[id]"
+              options={{
+                headerShown: true,
+                headerBackTitle: "Back",
+                headerTransparent: true,
+                headerTitle: "",
+              }}
+            />
+            <Stack.Screen
               name="product/[slug]"
               options={{
                 headerShown: true,
@@ -68,7 +84,7 @@ export default function RootLayout() {
               }}
             />
             <Stack.Screen
-              name="merchant/[slug]"
+              name="store/[slug]"
               options={{
                 headerShown: true,
                 headerBackTitle: "Back",
