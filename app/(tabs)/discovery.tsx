@@ -10,13 +10,11 @@ import {
   StyleSheet,
   View,
 } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AuthPrompt } from "@/components/auth-prompt";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { IconSymbol } from "@/components/ui/icon-symbol";
-import { Fonts } from "@/constants/theme";
 import { useThemeColor } from "@/hooks/use-theme-color";
 import { api } from "@/lib/api";
 import { useSession } from "@/lib/auth-client";
@@ -134,7 +132,6 @@ const keyExtractor = (item: Merchant) => item.id;
 const ItemSeparator = () => <View style={styles.separator} />;
 
 export default function DiscoveryScreen() {
-  const insets = useSafeAreaInsets();
   const { data: session } = useSession();
   const [showAuthPrompt, setShowAuthPrompt] = useState(false);
 
@@ -214,13 +211,6 @@ export default function DiscoveryScreen() {
 
   return (
     <ThemedView style={styles.container}>
-      <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
-        <ThemedText type="title" style={{ fontFamily: Fonts.rounded }}>
-          Discovery
-        </ThemedText>
-        <ThemedText style={styles.subtitle}>Explore stores</ThemedText>
-      </View>
-
       {isLoading ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" />
@@ -252,15 +242,6 @@ export default function DiscoveryScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  header: {
-    paddingHorizontal: 20,
-    paddingBottom: 18,
-    marginTop: 24,
-  },
-  subtitle: {
-    opacity: 0.7,
-    marginTop: 4,
   },
   listContent: {
     paddingHorizontal: 20,
