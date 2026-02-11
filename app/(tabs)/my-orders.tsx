@@ -8,7 +8,6 @@ import {
   StyleSheet,
   View,
 } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
@@ -86,7 +85,6 @@ function OrderRow({
 
 export default function MyOrdersScreen() {
   const colorScheme = useColorScheme() ?? "light";
-  const insets = useSafeAreaInsets();
 
   const { data, isLoading, isFetching, refetch, error } = useQuery({
     queryKey: ["orders"],
@@ -98,17 +96,6 @@ export default function MyOrdersScreen() {
 
   return (
     <ThemedView style={styles.container}>
-      <Stack.Screen options={{ title: "My Orders" }} />
-
-      <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
-        <ThemedText type="title" style={{ fontFamily: Fonts.rounded }}>
-          My Orders
-        </ThemedText>
-        <ThemedText style={styles.subtitle}>
-          Track your recent purchases
-        </ThemedText>
-      </View>
-
       {isLoading ? (
         <View style={styles.centered}>
           <ActivityIndicator size="large" color={Colors[colorScheme].tint} />
@@ -152,15 +139,6 @@ export default function MyOrdersScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  header: {
-    paddingHorizontal: 20,
-    paddingBottom: 18,
-    marginTop: 24,
-  },
-  subtitle: {
-    opacity: 0.7,
-    marginTop: 4,
   },
   centered: {
     flex: 1,

@@ -1,5 +1,5 @@
 import { Image } from "expo-image";
-import { router } from "expo-router";
+import { router, type Href } from "expo-router";
 import { useState } from "react";
 import {
   ActivityIndicator,
@@ -18,17 +18,31 @@ import { Colors, Fonts } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { signOut, useSession } from "@/lib/auth-client";
 
-export default function ProfileScreen() {
+type ProfilePanelProps = {
+  onNavigate?: () => void;
+  scrollEnabled?: boolean;
+};
+
+export function ProfilePanel({
+  onNavigate,
+  scrollEnabled = true,
+}: ProfilePanelProps) {
   const { data: session, isPending } = useSession();
   const colorScheme = useColorScheme() ?? "light";
   const insets = useSafeAreaInsets();
   const [showAuthPrompt, setShowAuthPrompt] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
 
+  const handlePush = (href: Href) => {
+    onNavigate?.();
+    router.push(href);
+  };
+
   const handleSignOut = async () => {
     setIsSigningOut(true);
     try {
       await signOut();
+      onNavigate?.();
     } finally {
       setIsSigningOut(false);
     }
@@ -44,7 +58,7 @@ export default function ProfileScreen() {
 
   if (!session?.user) {
     return (
-      <ThemedView style={[styles.container, { paddingTop: insets.top + 20 }]}>
+      <View style={styles.container}>
         <View style={styles.notSignedInContainer}>
           <IconSymbol
             name="person.crop.circle"
@@ -74,7 +88,7 @@ export default function ProfileScreen() {
             onCancel={() => setShowAuthPrompt(false)}
           />
         )}
-      </ThemedView>
+      </View>
     );
   }
 
@@ -86,7 +100,11 @@ export default function ProfileScreen() {
         styles.container,
         { backgroundColor: Colors[colorScheme].background },
       ]}
-      contentContainerStyle={{ paddingTop: insets.top + 20, paddingBottom: 40 }}
+      contentContainerStyle={{
+        paddingTop: Math.max(insets.top, 12),
+        paddingBottom: 40,
+      }}
+      scrollEnabled={scrollEnabled}
     >
       <View style={styles.header}>
         {user.image ? (
@@ -118,10 +136,14 @@ export default function ProfileScreen() {
             styles.menuItem,
             { borderBottomColor: Colors[colorScheme].icon + "20" },
           ]}
-          onPress={() => router.push("/my-orders")}
+          // onPress={() => handlePush("/payment-methods")}
         >
-          <IconSymbol name="bag" size={22} color={Colors[colorScheme].icon} />
-          <ThemedText style={styles.menuItemText}>My Orders</ThemedText>
+          <IconSymbol
+            name="creditcard"
+            size={22}
+            color={Colors[colorScheme].icon}
+          />
+          <ThemedText style={styles.menuItemText}>Payment Methods</ThemedText>
           <IconSymbol
             name="chevron.right"
             size={16}
@@ -134,6 +156,7 @@ export default function ProfileScreen() {
             styles.menuItem,
             { borderBottomColor: Colors[colorScheme].icon + "20" },
           ]}
+          // onPress={() => handlePush("/saved-items")}
         >
           <IconSymbol name="heart" size={22} color={Colors[colorScheme].icon} />
           <ThemedText style={styles.menuItemText}>Saved Items</ThemedText>
@@ -149,13 +172,16 @@ export default function ProfileScreen() {
             styles.menuItem,
             { borderBottomColor: Colors[colorScheme].icon + "20" },
           ]}
+          // onPress={() => handlePush("/shipping-addresses")}
         >
           <IconSymbol
             name="location"
             size={22}
             color={Colors[colorScheme].icon}
           />
-          <ThemedText style={styles.menuItemText}>Addresses</ThemedText>
+          <ThemedText style={styles.menuItemText}>
+            Shipping Addresses
+          </ThemedText>
           <IconSymbol
             name="chevron.right"
             size={16}
@@ -172,6 +198,7 @@ export default function ProfileScreen() {
             styles.menuItem,
             { borderBottomColor: Colors[colorScheme].icon + "20" },
           ]}
+          // onPress={() => handlePush("/notifications")}
         >
           <IconSymbol name="bell" size={22} color={Colors[colorScheme].icon} />
           <ThemedText style={styles.menuItemText}>Notifications</ThemedText>
@@ -187,6 +214,7 @@ export default function ProfileScreen() {
             styles.menuItem,
             { borderBottomColor: Colors[colorScheme].icon + "20" },
           ]}
+          // onPress={() => handlePush("/help-support")}
         >
           <IconSymbol
             name="questionmark.circle"

@@ -1,21 +1,6 @@
-import {
-  Badge,
-  Icon,
-  Label,
-  NativeTabs,
-} from "expo-router/unstable-native-tabs";
-
-// import { useCartStore } from "@/lib/cart-store";
-
-// const formatBadge = (count: number) => (count > 9 ? "9+" : String(count));
+import { Icon, Label, NativeTabs } from "expo-router/unstable-native-tabs";
 
 export default function TabLayout() {
-  // const itemCount = useCartStore((s) =>
-  //   s.items.reduce((count, item) => count + item.quantity, 0),
-  // );
-
-  // const badge = formatBadge(itemCount);
-
   return (
     <NativeTabs
       disableTransparentOnScrollEdge
@@ -35,13 +20,8 @@ export default function TabLayout() {
         <Label>Discovery</Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="my-orders">
-        <Icon sf="bag.fill" drawable="ic_menu_cart" />
-        {/* {Number(badge) < 1 ? null : <Badge>{badge}</Badge>} */}
+        <Icon sf="bag.fill" drawable="ic" />
         <Label>My Orders</Label>
-      </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="profile">
-        <Icon sf="person.fill" drawable="ic_menu_user" />
-        <Label>Profile</Label>
       </NativeTabs.Trigger>
     </NativeTabs>
   );

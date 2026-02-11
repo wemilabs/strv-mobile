@@ -1,10 +1,10 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Stack } from "expo-router";
 import { useState } from "react";
 import {
   ActivityIndicator,
   RefreshControl,
   StyleSheet,
-  Text,
   View,
 } from "react-native";
 import Animated, {
@@ -22,12 +22,22 @@ import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { api } from "@/lib/api";
 import type { Product } from "@/types";
-import { Link } from "expo-router";
 
-const HEADER_HEIGHT = 200;
-// const { width: SCREEN_WIDTH } = Dimensions.get("window");
+// in dark mode, the icon remain black and doesnt turn white so to be visible
+// work on the like feature properly
+
+const HEADER_HEIGHT = 148;
 
 export default function HomeScreen() {
+  return (
+    <>
+      <Stack.Screen options={{ title: "Home" }} />
+      <HomeScreenContent />
+    </>
+  );
+}
+
+function HomeScreenContent() {
   const colorScheme = useColorScheme() ?? "light";
   const scrollRef = useAnimatedRef<Animated.FlatList<Product>>();
   const scrollOffset = useScrollOffset(scrollRef);
@@ -40,7 +50,7 @@ export default function HomeScreen() {
       activeTab === "for-you"
         ? api.products.forYou()
         : api.products.following(),
-    staleTime: 5 * 60 * 1000, // 5 minutes cache
+    staleTime: 5 * 60 * 1000,
   });
 
   const products = data?.products ?? [];
@@ -90,28 +100,6 @@ export default function HomeScreen() {
 
   const keyExtractor = (item: Product) => item.id;
 
-  const renderHeader = () => (
-    <View>
-      <Animated.View
-        style={[
-          styles.header,
-          { backgroundColor: Colors[colorScheme].tint },
-          headerAnimatedStyle,
-        ]}
-      >
-        <View style={styles.headerContent}>
-          <Text className="text-4xl font-extrabold text-white/90">
-            ✨ Starva
-          </Text>
-          <ThemedText style={styles.tagline}>
-            Discover amazing products
-          </ThemedText>
-        </View>
-      </Animated.View>
-      <FeedTabs activeTab={activeTab} onTabChange={setActiveTab} />
-    </View>
-  );
-
   const renderEmpty = () => {
     if (isLoading) {
       return (
@@ -134,12 +122,15 @@ export default function HomeScreen() {
 
   return (
     <ThemedView style={styles.container}>
+      <FeedTabs activeTab={activeTab} onTabChange={setActiveTab} />
       <Animated.FlatList
         ref={scrollRef}
         data={products}
         renderItem={renderItem}
         keyExtractor={keyExtractor}
-        ListHeaderComponent={renderHeader}
+        // ListHeaderComponent={
+        // <FeedTabs activeTab={activeTab} onTabChange={setActiveTab} />
+        // }
         ListEmptyComponent={renderEmpty}
         ListFooterComponent={null}
         onEndReached={undefined}
@@ -170,18 +161,8 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   headerContent: {
-    padding: 24,
-    paddingBottom: 32,
-  },
-  logo: {
-    fontSize: 32,
-    fontWeight: "800",
-    color: "#fff",
-  },
-  tagline: {
-    fontSize: 16,
-    color: "rgba(255,255,255,0.85)",
-    marginTop: 4,
+    justifyContent: "center",
+    alignItems: "center",
   },
   content: {
     flexGrow: 1,
