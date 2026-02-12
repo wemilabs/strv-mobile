@@ -1,7 +1,7 @@
 import { Image } from "expo-image";
 import { Link } from "expo-router";
 import { useState } from "react";
-import { Pressable, StyleSheet, View } from "react-native";
+import { Platform, Pressable, StyleSheet, View } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -61,6 +61,8 @@ export function ProductCard({ product, onLikeUpdate }: ProductCardProps) {
       setIsLiking(false);
     }
   };
+
+  // const LinkElement = Platform.OS === "ios" ? Link.AppleZoom : Link;
 
   return (
     <>
