@@ -1,5 +1,4 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Stack } from "expo-router";
 import { useState } from "react";
 import {
   ActivityIndicator,
@@ -8,9 +7,7 @@ import {
   View,
 } from "react-native";
 import Animated, {
-  interpolate,
   useAnimatedRef,
-  useAnimatedStyle,
   useScrollOffset,
 } from "react-native-reanimated";
 
@@ -29,12 +26,7 @@ import type { Product } from "@/types";
 const HEADER_HEIGHT = 148;
 
 export default function HomeScreen() {
-  return (
-    <>
-      <Stack.Screen options={{ title: "Home" }} />
-      <HomeScreenContent />
-    </>
-  );
+  return <HomeScreenContent />;
 }
 
 function HomeScreenContent() {
@@ -74,25 +66,6 @@ function HomeScreenContent() {
       };
     });
   };
-
-  const headerAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [
-      {
-        translateY: interpolate(
-          scrollOffset.value,
-          [-HEADER_HEIGHT, 0, HEADER_HEIGHT],
-          [-HEADER_HEIGHT / 2, 0, HEADER_HEIGHT * 0.75],
-        ),
-      },
-      {
-        scale: interpolate(
-          scrollOffset.value,
-          [-HEADER_HEIGHT, 0, HEADER_HEIGHT],
-          [2, 1, 1],
-        ),
-      },
-    ],
-  }));
 
   const renderItem = ({ item }: { item: Product }) => (
     <ProductCard product={item} onLikeUpdate={handleLikeUpdate} />
