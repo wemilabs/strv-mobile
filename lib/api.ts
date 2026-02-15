@@ -23,7 +23,6 @@ type FetchOptions = {
 
 async function fetchAPI<T>(
   endpoint: string,
-
   options: FetchOptions = {},
 ): Promise<T> {
   const { method = "GET", body, params } = options;
@@ -180,6 +179,7 @@ export const api = {
   },
 
   user: {
+    likedProducts: () => fetchAPI<ProductsResponse>("/user/liked-products"),
     preferences: () =>
       fetchAPI<{
         preferences: { categories: string[]; followingIds: string[] };

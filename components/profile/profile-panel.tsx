@@ -93,155 +93,205 @@ export function ProfilePanel({
   }
 
   const user = session.user;
+  const followersCount =
+    (user as { followersCount?: number }).followersCount ?? 0;
+  const followingCount =
+    (user as { followingCount?: number }).followingCount ?? 0;
+  const formattedFollowersCount = Intl.NumberFormat("en", {
+    notation: "compact",
+    maximumFractionDigits: 1,
+  }).format(followersCount);
+  const formattedFollowingCount = Intl.NumberFormat("en", {
+    notation: "compact",
+    maximumFractionDigits: 1,
+  }).format(followingCount);
 
   return (
-    <ScrollView
+    <View
       style={[
         styles.container,
         { backgroundColor: Colors[colorScheme].background },
       ]}
-      contentContainerStyle={{
-        paddingTop: Math.max(insets.top, 12),
-        paddingBottom: 40,
-      }}
-      scrollEnabled={scrollEnabled}
     >
-      <View style={styles.header}>
-        {user.image ? (
-          <Image source={{ uri: user.image }} style={styles.avatar} />
-        ) : (
-          <View
-            style={[
-              styles.avatarPlaceholder,
-              { backgroundColor: Colors[colorScheme].tint },
-            ]}
-          >
-            <ThemedText style={styles.avatarInitial}>
-              {user.name?.charAt(0).toUpperCase() ||
-                user.email?.charAt(0).toUpperCase()}
-            </ThemedText>
-          </View>
-        )}
-        <ThemedText style={[styles.userName, { fontFamily: Fonts.rounded }]}>
-          {user.name || "User"}
-        </ThemedText>
-        <ThemedText style={styles.userEmail}>{user.email}</ThemedText>
-      </View>
-
-      <View style={styles.section}>
-        <ThemedText style={styles.sectionTitle}>Account</ThemedText>
-
-        <Pressable
-          style={[
-            styles.menuItem,
-            { borderBottomColor: Colors[colorScheme].icon + "20" },
-          ]}
-          // onPress={() => handlePush("/payment-methods")}
-        >
-          <IconSymbol
-            name="creditcard"
-            size={22}
-            color={Colors[colorScheme].icon}
-          />
-          <ThemedText style={styles.menuItemText}>Payment Methods</ThemedText>
-          <IconSymbol
-            name="chevron.right"
-            size={16}
-            color={Colors[colorScheme].icon}
-          />
-        </Pressable>
-
-        <Pressable
-          style={[
-            styles.menuItem,
-            { borderBottomColor: Colors[colorScheme].icon + "20" },
-          ]}
-          // onPress={() => handlePush("/saved-items")}
-        >
-          <IconSymbol name="heart" size={22} color={Colors[colorScheme].icon} />
-          <ThemedText style={styles.menuItemText}>Saved Items</ThemedText>
-          <IconSymbol
-            name="chevron.right"
-            size={16}
-            color={Colors[colorScheme].icon}
-          />
-        </Pressable>
-
-        <Pressable
-          style={[
-            styles.menuItem,
-            { borderBottomColor: Colors[colorScheme].icon + "20" },
-          ]}
-          // onPress={() => handlePush("/shipping-addresses")}
-        >
-          <IconSymbol
-            name="location"
-            size={22}
-            color={Colors[colorScheme].icon}
-          />
-          <ThemedText style={styles.menuItemText}>
-            Shipping Addresses
-          </ThemedText>
-          <IconSymbol
-            name="chevron.right"
-            size={16}
-            color={Colors[colorScheme].icon}
-          />
-        </Pressable>
-      </View>
-
-      <View style={styles.section}>
-        <ThemedText style={styles.sectionTitle}>Settings</ThemedText>
-
-        <Pressable
-          style={[
-            styles.menuItem,
-            { borderBottomColor: Colors[colorScheme].icon + "20" },
-          ]}
-          // onPress={() => handlePush("/notifications")}
-        >
-          <IconSymbol name="bell" size={22} color={Colors[colorScheme].icon} />
-          <ThemedText style={styles.menuItemText}>Notifications</ThemedText>
-          <IconSymbol
-            name="chevron.right"
-            size={16}
-            color={Colors[colorScheme].icon}
-          />
-        </Pressable>
-
-        <Pressable
-          style={[
-            styles.menuItem,
-            { borderBottomColor: Colors[colorScheme].icon + "20" },
-          ]}
-          // onPress={() => handlePush("/help-support")}
-        >
-          <IconSymbol
-            name="questionmark.circle"
-            size={22}
-            color={Colors[colorScheme].icon}
-          />
-          <ThemedText style={styles.menuItemText}>Help & Support</ThemedText>
-          <IconSymbol
-            name="chevron.right"
-            size={16}
-            color={Colors[colorScheme].icon}
-          />
-        </Pressable>
-      </View>
-
-      <Pressable
-        style={[styles.signOutButton, { borderColor: "#ff4444" }]}
-        onPress={handleSignOut}
-        disabled={isSigningOut}
+      <ScrollView
+        contentContainerStyle={{
+          paddingTop: Math.max(insets.top, 12),
+          paddingBottom: 24,
+        }}
+        scrollEnabled={scrollEnabled}
       >
-        {isSigningOut ? (
-          <ActivityIndicator size="small" color="#ff4444" />
-        ) : (
-          <ThemedText style={styles.signOutText}>Sign Out</ThemedText>
-        )}
-      </Pressable>
-    </ScrollView>
+        <View style={styles.header}>
+          <View style={styles.headerContent}>
+            {user.image ? (
+              <Image source={{ uri: user.image }} style={styles.avatar} />
+            ) : (
+              <View
+                style={[
+                  styles.avatarPlaceholder,
+                  { backgroundColor: Colors[colorScheme].tint },
+                ]}
+              >
+                <ThemedText style={styles.avatarInitial}>
+                  {user.name?.charAt(0).toUpperCase() ||
+                    user.email?.charAt(0).toUpperCase()}
+                </ThemedText>
+              </View>
+            )}
+            <View style={styles.userInfo}>
+              <ThemedText
+                style={[styles.userName, { fontFamily: Fonts.rounded }]}
+              >
+                {user.name || "User"}
+              </ThemedText>
+              <ThemedText style={styles.userEmail}>{user.email}</ThemedText>
+            </View>
+          </View>
+          <View style={styles.statsRow}>
+            <View style={styles.statItem}>
+              <ThemedText style={styles.statValue}>
+                {formattedFollowingCount}
+              </ThemedText>
+              <ThemedText style={styles.statLabel}>Following</ThemedText>
+            </View>
+            <View style={styles.statItem}>
+              <ThemedText style={styles.statValue}>
+                {formattedFollowersCount}
+              </ThemedText>
+              <ThemedText style={styles.statLabel}>
+                Follower{followersCount <= 1 ? "" : "s"}
+              </ThemedText>
+            </View>
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <ThemedText style={styles.sectionTitle}>Account</ThemedText>
+
+          <Pressable
+            style={[
+              styles.menuItem,
+              { borderBottomColor: Colors[colorScheme].icon + "20" },
+            ]}
+            onPress={() => handlePush("/payment-methods")}
+          >
+            <IconSymbol
+              name="creditcard"
+              size={22}
+              color={Colors[colorScheme].icon}
+            />
+            <ThemedText style={styles.menuItemText}>Payment Methods</ThemedText>
+            <IconSymbol
+              name="chevron.right"
+              size={16}
+              color={Colors[colorScheme].icon}
+            />
+          </Pressable>
+          <Pressable
+            style={[
+              styles.menuItem,
+              { borderBottomColor: Colors[colorScheme].icon + "20" },
+            ]}
+            onPress={() => handlePush("/saved-items")}
+          >
+            <IconSymbol
+              name="heart"
+              size={22}
+              color={Colors[colorScheme].icon}
+            />
+            <ThemedText style={styles.menuItemText}>Saved Items</ThemedText>
+            <IconSymbol
+              name="chevron.right"
+              size={16}
+              color={Colors[colorScheme].icon}
+            />
+          </Pressable>
+          <Pressable
+            style={[
+              styles.menuItem,
+              { borderBottomColor: Colors[colorScheme].icon + "20" },
+            ]}
+            onPress={() => handlePush("/shipping-addresses")}
+          >
+            <IconSymbol
+              name="location"
+              size={22}
+              color={Colors[colorScheme].icon}
+            />
+            <ThemedText style={styles.menuItemText}>
+              Shipping Addresses
+            </ThemedText>
+            <IconSymbol
+              name="chevron.right"
+              size={16}
+              color={Colors[colorScheme].icon}
+            />
+          </Pressable>
+        </View>
+
+        <View style={styles.section}>
+          <ThemedText style={styles.sectionTitle}>Settings</ThemedText>
+          <Pressable
+            style={[
+              styles.menuItem,
+              { borderBottomColor: Colors[colorScheme].icon + "20" },
+            ]}
+            onPress={() => handlePush("/notifications")}
+          >
+            <IconSymbol
+              name="bell"
+              size={22}
+              color={Colors[colorScheme].icon}
+            />
+            <ThemedText style={styles.menuItemText}>Notifications</ThemedText>
+            <IconSymbol
+              name="chevron.right"
+              size={16}
+              color={Colors[colorScheme].icon}
+            />
+          </Pressable>
+          <Pressable
+            style={[
+              styles.menuItem,
+              { borderBottomColor: Colors[colorScheme].icon + "20" },
+            ]}
+            onPress={() => handlePush("/help-support")}
+          >
+            <IconSymbol
+              name="questionmark.circle"
+              size={22}
+              color={Colors[colorScheme].icon}
+            />
+            <ThemedText style={styles.menuItemText}>Help & Support</ThemedText>
+            <IconSymbol
+              name="chevron.right"
+              size={16}
+              color={Colors[colorScheme].icon}
+            />
+          </Pressable>
+        </View>
+      </ScrollView>
+
+      <View
+        style={[
+          styles.footer,
+          {
+            paddingBottom: Math.max(insets.bottom, 12),
+          },
+        ]}
+      >
+        <Pressable
+          style={[styles.signOutButton, { borderColor: "#ff4444" }]}
+          onPress={handleSignOut}
+          disabled={isSigningOut}
+        >
+          {isSigningOut ? (
+            <ActivityIndicator size="small" color="#ff4444" />
+          ) : (
+            <ThemedText style={styles.signOutText}>Sign Out</ThemedText>
+          )}
+        </Pressable>
+      </View>
+    </View>
   );
 }
 
@@ -284,36 +334,65 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   header: {
-    alignItems: "center",
     paddingHorizontal: 20,
-    paddingBottom: 24,
+    paddingBottom: 10,
+  },
+  headerContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   avatar: {
-    width: 90,
-    height: 90,
-    borderRadius: 45,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginTop: 12,
   },
   avatarPlaceholder: {
-    width: 90,
-    height: 90,
-    borderRadius: 45,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginTop: 12,
     justifyContent: "center",
     alignItems: "center",
   },
   avatarInitial: {
-    fontSize: 36,
+    fontSize: 24,
     fontWeight: "600",
     color: "#fff",
   },
+  userInfo: {
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "flex-start",
+  },
   userName: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: "600",
     marginTop: 16,
   },
   userEmail: {
     fontSize: 15,
     opacity: 0.7,
-    marginTop: 4,
+  },
+  statsRow: {
+    marginTop: 14,
+    flexDirection: "row",
+    justifyContent: "flex-start",
+    gap: 24,
+  },
+  statItem: {
+    flexDirection: "row",
+    alignItems: "baseline",
+    gap: 4,
+  },
+  statValue: {
+    fontSize: 16,
+    fontWeight: "700",
+  },
+  statLabel: {
+    fontSize: 14,
+    opacity: 0.7,
   },
   section: {
     paddingHorizontal: 20,
@@ -339,11 +418,14 @@ const styles = StyleSheet.create({
   },
   signOutButton: {
     marginHorizontal: 20,
-    marginTop: 40,
+    marginTop: 12,
     paddingVertical: 14,
     borderRadius: 12,
     borderWidth: 1,
     alignItems: "center",
+  },
+  footer: {
+    paddingTop: 12,
   },
   signOutText: {
     color: "#ff4444",

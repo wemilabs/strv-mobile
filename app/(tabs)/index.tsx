@@ -1,15 +1,12 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   RefreshControl,
   StyleSheet,
   View,
 } from "react-native";
-import Animated, {
-  useAnimatedRef,
-  useScrollOffset,
-} from "react-native-reanimated";
+import Animated, { useAnimatedRef } from "react-native-reanimated";
 
 import { FeedTabs, type FeedTab } from "@/components/feed/feed-tabs";
 import { ProductCard } from "@/components/product/product-card";
@@ -18,10 +15,8 @@ import { ThemedView } from "@/components/themed-view";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { api } from "@/lib/api";
+import { registerScrollToTop } from "@/lib/scroll-to-top";
 import type { Product } from "@/types";
-
-// in dark mode, the icon remain black and doesnt turn white so to be visible
-// work on the like feature properly
 
 const HEADER_HEIGHT = 148;
 
@@ -32,7 +27,14 @@ export default function HomeScreen() {
 function HomeScreenContent() {
   const colorScheme = useColorScheme() ?? "light";
   const scrollRef = useAnimatedRef<Animated.FlatList<Product>>();
-  const scrollOffset = useScrollOffset(scrollRef);
+
+  useEffect(() => {
+    return registerScrollToTop("index", () => {
+      scrollRef.current?.scrollToOffset({ offset: 0, animated: true });
+    });
+  }, [scrollRef]);
+
+  const queryClient = useQueryClient();
 
   const [activeTab, setActiveTab] = useState<FeedTab>("for-you");
 
@@ -53,7 +55,6 @@ function HomeScreenContent() {
     likesCount: number,
   ) => {
     // Update local data optimistically
-    const queryClient = useQueryClient();
     queryClient.setQueryData(["products", activeTab], (oldData: any) => {
       if (!oldData) return oldData;
       return {
@@ -95,15 +96,14 @@ function HomeScreenContent() {
 
   return (
     <ThemedView style={styles.container}>
-      <FeedTabs activeTab={activeTab} onTabChange={setActiveTab} />
       <Animated.FlatList
         ref={scrollRef}
         data={products}
         renderItem={renderItem}
         keyExtractor={keyExtractor}
-        // ListHeaderComponent={
-        // <FeedTabs activeTab={activeTab} onTabChange={setActiveTab} />
-        // }
+        ListHeaderComponent={
+          <FeedTabs activeTab={activeTab} onTabChange={setActiveTab} />
+        }
         ListEmptyComponent={renderEmpty}
         ListFooterComponent={null}
         onEndReached={undefined}
@@ -140,6 +140,7 @@ const styles = StyleSheet.create({
   content: {
     flexGrow: 1,
     paddingBottom: 100,
+    paddingTop: 114,
   },
   centered: {
     flex: 1,

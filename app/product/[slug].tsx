@@ -1,6 +1,6 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Image } from "expo-image";
-import { router, Stack, useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import {
   ActivityIndicator,
@@ -10,12 +10,7 @@ import {
   StyleSheet,
   View,
 } from "react-native";
-import Animated, {
-  FadeIn,
-  useAnimatedStyle,
-  useSharedValue,
-  withSpring,
-} from "react-native-reanimated";
+import Animated, { FadeIn } from "react-native-reanimated";
 
 import { AuthPrompt } from "@/components/auth-prompt";
 import { ThemedText } from "@/components/themed-text";
@@ -34,9 +29,6 @@ export default function ProductDetailScreen() {
 
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [showAuthPrompt, setShowAuthPrompt] = useState(false);
-  const [isLiking, setIsLiking] = useState(false);
-
-  const likeScale = useSharedValue(1);
 
   const { data: product, isLoading } = useQuery({
     queryKey: ["product", slug],
@@ -44,67 +36,6 @@ export default function ProductDetailScreen() {
     enabled: !!slug,
     staleTime: 5 * 60 * 1000,
   });
-
-  const handleLike = async () => {
-    if (!product || isLiking) return;
-
-    if (!session) {
-      setShowAuthPrompt(true);
-      return;
-    }
-
-    likeScale.value = withSpring(1.3, {}, () => {
-      likeScale.value = withSpring(1);
-    });
-
-    const queryClient = useQueryClient();
-    const previousState = {
-      isLiked: product.isLiked,
-      likesCount: product.likesCount,
-    };
-
-    // Optimistic update
-    queryClient.setQueryData(["product", slug], (oldData: any) => {
-      if (!oldData) return oldData;
-      return {
-        ...oldData,
-        isLiked: !oldData.isLiked,
-        likesCount: oldData.isLiked
-          ? oldData.likesCount - 1
-          : oldData.likesCount + 1,
-      };
-    });
-
-    setIsLiking(true);
-    try {
-      const result = previousState.isLiked
-        ? await api.products.unlike(product.slug)
-        : await api.products.like(product.slug);
-
-      // Update with server response
-      queryClient.setQueryData(["product", slug], (oldData: any) => {
-        if (!oldData) return oldData;
-        return {
-          ...oldData,
-          isLiked: result.liked,
-          likesCount: result.likesCount,
-        };
-      });
-    } catch (error) {
-      console.error("Failed to toggle like:", error);
-      // Revert optimistic update
-      queryClient.setQueryData(["product", slug], (oldData: any) => {
-        if (!oldData) return oldData;
-        return { ...oldData, ...previousState };
-      });
-    } finally {
-      setIsLiking(false);
-    }
-  };
-
-  const likeAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: likeScale.value }],
-  }));
 
   const { addItem } = useCartStore();
 
@@ -151,22 +82,6 @@ export default function ProductDetailScreen() {
 
   return (
     <ThemedView style={styles.container}>
-      {/* <Stack.Screen
-        options={{
-          title: "",
-          headerTransparent: true,
-          headerRight: () => (
-            <Pressable onPress={handleLike}>
-              <Animated.View style={likeAnimatedStyle}>
-                <ThemedText style={styles.headerLike}>
-                  {product.isLiked ? "♥" : "♡"}
-                </ThemedText>
-              </Animated.View>
-            </Pressable>
-          ),
-        }}
-      /> */}
-
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
@@ -181,13 +96,6 @@ export default function ProductDetailScreen() {
                 transition={200}
               />
             )}
-            {/* <Pressable onPress={handleLike}>
-              <Animated.View style={likeAnimatedStyle}>
-                <ThemedText style={styles.headerLike}>
-                  {product.isLiked ? "♥" : "♡"}
-                </ThemedText>
-              </Animated.View>
-            </Pressable> */}
           </View>
 
           {(product.imageUrls?.length ?? 0) > 1 && (
@@ -226,7 +134,7 @@ export default function ProductDetailScreen() {
             <Pressable
               style={styles.merchantRow}
               onPress={() =>
-                router.push(`/store/${product.organization?.slug}` as any)
+                router.push(`/store/${product.organization?.slug}`)
               }
             >
               {product.organization.logo && (
