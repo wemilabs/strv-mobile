@@ -1,14 +1,16 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Dimensions, Pressable, StyleSheet, View } from "react-native";
 import Animated, {
+  Easing,
   useAnimatedStyle,
   useSharedValue,
+  withSpring,
   withTiming,
 } from "react-native-reanimated";
 
-import { useColorScheme } from "@/hooks/use-color-scheme";
-import { Colors } from "@/constants/theme";
 import { ProfilePanel } from "@/components/profile/profile-panel";
+import { Colors } from "@/constants/theme";
+import { useColorScheme } from "@/hooks/use-color-scheme";
 
 type ProfileSidebarProps = {
   isOpen: boolean;
@@ -20,22 +22,21 @@ const SIDEBAR_WIDTH = Math.min(320, Math.round(SCREEN_WIDTH * 0.85));
 
 export function ProfileSidebar({ isOpen, onClose }: ProfileSidebarProps) {
   const colorScheme = useColorScheme() ?? "light";
-  const [isRendered, setIsRendered] = useState(isOpen);
-  const translateX = useSharedValue(-SIDEBAR_WIDTH);
-  const overlayOpacity = useSharedValue(0);
+  const translateX = useSharedValue(isOpen ? 0 : -SIDEBAR_WIDTH);
+  const overlayOpacity = useSharedValue(isOpen ? 1 : 0);
 
   useEffect(() => {
-    if (isOpen) setIsRendered(true);
-
-    translateX.value = withTiming(isOpen ? 0 : -SIDEBAR_WIDTH, {
-      duration: 220,
+    translateX.value = withSpring(isOpen ? 0 : -SIDEBAR_WIDTH, {
+      damping: 22,
+      stiffness: 180,
+      mass: 1,
+      overshootClamping: true,
     });
-    overlayOpacity.value = withTiming(isOpen ? 1 : 0, { duration: 180 });
 
-    if (!isOpen) {
-      const timeoutId = setTimeout(() => setIsRendered(false), 240);
-      return () => clearTimeout(timeoutId);
-    }
+    overlayOpacity.value = withTiming(isOpen ? 1 : 0, {
+      duration: isOpen ? 220 : 280,
+      easing: Easing.out(Easing.cubic),
+    });
   }, [isOpen, overlayOpacity, translateX]);
 
   const overlayStyle = useAnimatedStyle(() => {
@@ -50,8 +51,6 @@ export function ProfileSidebar({ isOpen, onClose }: ProfileSidebarProps) {
     };
   });
 
-  if (!isRendered) return null;
-
   return (
     <View style={styles.root} pointerEvents={isOpen ? "auto" : "none"}>
       <Animated.View
@@ -61,7 +60,11 @@ export function ProfileSidebar({ isOpen, onClose }: ProfileSidebarProps) {
           overlayStyle,
         ]}
       >
-        <Pressable style={styles.overlayPressable} onPress={onClose} />
+        <Pressable
+          style={styles.overlayPressable}
+          onPress={onClose}
+          disabled={!isOpen}
+        />
       </Animated.View>
 
       <Animated.View
@@ -71,11 +74,7 @@ export function ProfileSidebar({ isOpen, onClose }: ProfileSidebarProps) {
           sidebarStyle,
         ]}
       >
-        <ProfilePanel
-          variant="sidebar"
-          onNavigate={onClose}
-          scrollEnabled={true}
-        />
+        <ProfilePanel onNavigate={onClose} scrollEnabled={true} />
       </Animated.View>
     </View>
   );

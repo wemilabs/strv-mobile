@@ -30,6 +30,8 @@ export default function MerchantDetailScreen() {
   const insets = useSafeAreaInsets();
   const tintColor = useThemeColor({}, "tint");
 
+  const queryClient = useQueryClient();
+
   const [showAuthPrompt, setShowAuthPrompt] = useState(false);
   const [isFollowLoading, setIsFollowLoading] = useState(false);
 
@@ -47,8 +49,6 @@ export default function MerchantDetailScreen() {
       setShowAuthPrompt(true);
       return;
     }
-
-    const queryClient = useQueryClient();
     const wasFollowing = merchant.isFollowing;
 
     // Optimistic update
@@ -93,7 +93,6 @@ export default function MerchantDetailScreen() {
     isLiked: boolean,
     likesCount: number,
   ) => {
-    const queryClient = useQueryClient();
     queryClient.setQueryData(["merchant", slug], (oldData: any) => {
       if (!oldData) return oldData;
       return {

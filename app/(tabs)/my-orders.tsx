@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { router, Stack } from "expo-router";
+import { router } from "expo-router";
+import { useEffect, useRef } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -9,12 +10,13 @@ import {
   View,
 } from "react-native";
 
+import { OrderStatusBadge } from "@/components/orders/order-status-badge";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
-import { OrderStatusBadge } from "@/components/orders/order-status-badge";
 import { Colors, Fonts } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { api } from "@/lib/api";
+import { registerScrollToTop } from "@/lib/scroll-to-top";
 import { formatPrice } from "@/lib/utils";
 import { type OrderListItem } from "@/types";
 
@@ -86,6 +88,14 @@ function OrderRow({
 export default function MyOrdersScreen() {
   const colorScheme = useColorScheme() ?? "light";
 
+  const listRef = useRef<FlatList<OrderListItem> | null>(null);
+
+  useEffect(() => {
+    return registerScrollToTop("my-orders", () => {
+      listRef.current?.scrollToOffset({ offset: 0, animated: true });
+    });
+  }, []);
+
   const { data, isLoading, isFetching, refetch, error } = useQuery({
     queryKey: ["orders"],
     queryFn: () => api.orders.list(),
@@ -96,42 +106,46 @@ export default function MyOrdersScreen() {
 
   return (
     <ThemedView style={styles.container}>
-      {isLoading ? (
-        <View style={styles.centered}>
-          <ActivityIndicator size="large" color={Colors[colorScheme].tint} />
-        </View>
-      ) : error ? (
-        <View style={styles.centered}>
-          <ThemedText style={styles.emptyText}>
-            Failed to load orders. Pull to refresh.
-          </ThemedText>
-        </View>
-      ) : (
-        <FlatList
-          data={orders}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <OrderRow
-              order={item}
-              onPress={() => router.push(`/my-orders/${item.id}` as any)}
-            />
-          )}
-          contentContainerStyle={styles.listContent}
-          showsVerticalScrollIndicator={false}
-          refreshControl={
-            <RefreshControl
-              refreshing={isFetching}
-              onRefresh={() => refetch()}
-              tintColor={Colors[colorScheme].tint}
-            />
-          }
-          ListEmptyComponent={
+      <FlatList
+        ref={listRef}
+        data={orders}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <OrderRow
+            order={item}
+            onPress={() => router.push(`/my-orders/${item.id}` as any)}
+          />
+        )}
+        contentContainerStyle={styles.listContent}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={isFetching && !isLoading}
+            onRefresh={() => refetch()}
+            tintColor={Colors[colorScheme].tint}
+          />
+        }
+        ListEmptyComponent={
+          isLoading ? (
+            <View style={styles.centered}>
+              <ActivityIndicator
+                size="large"
+                color={Colors[colorScheme].tint}
+              />
+            </View>
+          ) : error ? (
+            <View style={styles.centered}>
+              <ThemedText style={styles.emptyText}>
+                Failed to load orders. Pull to refresh.
+              </ThemedText>
+            </View>
+          ) : (
             <View style={styles.centered}>
               <ThemedText style={styles.emptyText}>No orders yet</ThemedText>
             </View>
-          }
-        />
-      )}
+          )
+        }
+      />
     </ThemedView>
   );
 }
@@ -153,7 +167,8 @@ const styles = StyleSheet.create({
   listContent: {
     paddingHorizontal: 20,
     paddingBottom: 24,
-    paddingTop: 16,
+    paddingTop: 120,
+    // paddingTop: 16,
     gap: 12,
   },
   orderRow: {

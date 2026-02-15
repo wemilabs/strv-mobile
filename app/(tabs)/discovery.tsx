@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Image } from "expo-image";
 import { router } from "expo-router";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -18,6 +18,7 @@ import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useThemeColor } from "@/hooks/use-theme-color";
 import { api } from "@/lib/api";
 import { useSession } from "@/lib/auth-client";
+import { registerScrollToTop } from "@/lib/scroll-to-top";
 import type { Merchant } from "@/types";
 
 type MerchantCardProps = {
@@ -119,7 +120,9 @@ const MerchantCard = function MerchantCard({
           <View style={styles.productsContainer}>
             <IconSymbol name="bag.fill" size={12} color={subtextColor} />
             <ThemedText style={[styles.productsCount, { color: subtextColor }]}>
-              {productsCount} products
+              {productsCount === 0
+                ? "No products yet"
+                : `${productsCount} product${productsCount <= 1 ? "" : "s"}`}
             </ThemedText>
           </View>
         </View>
@@ -134,6 +137,16 @@ const ItemSeparator = () => <View style={styles.separator} />;
 export default function DiscoveryScreen() {
   const { data: session } = useSession();
   const [showAuthPrompt, setShowAuthPrompt] = useState(false);
+
+  const listRef = useRef<FlatList<Merchant> | null>(null);
+
+  useEffect(() => {
+    return registerScrollToTop("discovery", () => {
+      listRef.current?.scrollToOffset({ offset: 0, animated: true });
+    });
+  }, []);
+
+  const queryClient = useQueryClient();
 
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["merchants"],
@@ -151,8 +164,6 @@ export default function DiscoveryScreen() {
       setShowAuthPrompt(true);
       return;
     }
-
-    const queryClient = useQueryClient();
     const merchant = merchants.find((m) => m.id === merchantId);
     if (!merchant) return;
 
@@ -217,6 +228,7 @@ export default function DiscoveryScreen() {
         </View>
       ) : (
         <FlatList
+          ref={listRef}
           data={merchants}
           keyExtractor={keyExtractor}
           renderItem={renderItem}
@@ -246,7 +258,8 @@ const styles = StyleSheet.create({
   listContent: {
     paddingHorizontal: 20,
     paddingBottom: 100,
-    paddingTop: 16,
+    paddingTop: 120,
+    // paddingTop: 16,
     // gap: 12,
   },
   separator: {

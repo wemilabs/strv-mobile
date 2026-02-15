@@ -1,7 +1,9 @@
+import Ionicons from "@expo/vector-icons/Ionicons";
+import { useQueryClient } from "@tanstack/react-query";
 import { Image } from "expo-image";
 import { Link } from "expo-router";
 import { useState } from "react";
-import { Platform, Pressable, StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -13,9 +15,9 @@ import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { api } from "@/lib/api";
 import { useSession } from "@/lib/auth-client";
+import { formatPrice } from "@/lib/utils";
 import type { Product } from "@/types";
 import { AuthPrompt } from "../auth-prompt";
-import { formatPrice } from "@/lib/utils";
 
 type ProductCardProps = {
   product: Product;
@@ -26,8 +28,42 @@ export function ProductCard({ product, onLikeUpdate }: ProductCardProps) {
   const colorScheme = useColorScheme() ?? "light";
   const scale = useSharedValue(1);
   const { data: session } = useSession();
+  const queryClient = useQueryClient();
   const [showAuthPrompt, setShowAuthPrompt] = useState(false);
   const [isLiking, setIsLiking] = useState(false);
+
+  const patchLikeState = (liked: boolean, likesCount: number) => {
+    queryClient.setQueriesData(
+      { queryKey: ["products"], exact: false },
+      (d: any) => {
+        if (!d?.products) return d;
+        return {
+          ...d,
+          products: d.products.map((p: Product) =>
+            p.slug === product.slug ? { ...p, isLiked: liked, likesCount } : p,
+          ),
+        };
+      },
+    );
+
+    queryClient.setQueriesData(
+      { queryKey: ["merchant"], exact: false },
+      (d: any) => {
+        if (!d?.products) return d;
+        return {
+          ...d,
+          products: d.products.map((p: Product) =>
+            p.slug === product.slug ? { ...p, isLiked: liked, likesCount } : p,
+          ),
+        };
+      },
+    );
+
+    queryClient.setQueryData(["product", product.slug], (d: any) => {
+      if (!d) return d;
+      return { ...d, isLiked: liked, likesCount };
+    });
+  };
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
@@ -50,12 +86,38 @@ export function ProductCard({ product, onLikeUpdate }: ProductCardProps) {
 
     setIsLiking(true);
     try {
-      const result = product.isLiked
+      const preferUnlike = product.isLiked;
+
+      let result = preferUnlike
         ? await api.products.unlike(product.slug)
         : await api.products.like(product.slug);
 
+      // If local `isLiked` is stale (e.g. coming from a cached store/merchant page),
+      // the server may respond 400. In that case we retry the opposite action once.
+      if (!result?.success) {
+        throw new Error("API error: 400");
+      }
+
       onLikeUpdate?.(product.slug, result.liked, result.likesCount);
+      patchLikeState(result.liked, result.likesCount);
     } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+
+      if (message.includes("400")) {
+        try {
+          const result = product.isLiked
+            ? await api.products.like(product.slug)
+            : await api.products.unlike(product.slug);
+
+          onLikeUpdate?.(product.slug, result.liked, result.likesCount);
+          patchLikeState(result.liked, result.likesCount);
+          return;
+        } catch (retryError) {
+          console.error("Failed to toggle like:", retryError);
+          return;
+        }
+      }
+
       console.error("Failed to toggle like:", error);
     } finally {
       setIsLiking(false);
@@ -91,9 +153,11 @@ export function ProductCard({ product, onLikeUpdate }: ProductCardProps) {
                 ]}
                 onPress={handleLike}
               >
-                <ThemedText style={styles.likeIcon}>
-                  {product.isLiked ? "♥" : "♡"}
-                </ThemedText>
+                <Ionicons
+                  name={product.isLiked ? "heart" : "heart-outline"}
+                  size={24}
+                  color={product.isLiked ? "white" : "black"}
+                />
               </Pressable>
             </View>
 
@@ -133,22 +197,6 @@ export function ProductCard({ product, onLikeUpdate }: ProductCardProps) {
                   </ThemedText>
                 </View>
               </View>
-
-              {/* {(product.tags?.length ?? 0) > 0 && (
-                <View style={styles.tags}>
-                  {product.tags?.slice(0, 3).map((tag) => (
-                    <View
-                      key={tag.id}
-                      style={[
-                        styles.tag,
-                        { backgroundColor: Colors[colorScheme].tint + "20" },
-                      ]}
-                    >
-                      <ThemedText style={styles.tagText}>{tag.name}</ThemedText>
-                    </View>
-                  ))}
-                </View>
-              )} */}
             </View>
           </Animated.View>
         </Pressable>
