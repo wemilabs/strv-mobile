@@ -92,7 +92,7 @@ export const api = {
     byId: (id: string) => fetchAPI<OrderDetail>(`/orders/${id}`),
 
     create: (data: {
-      items: Array<{ productId: string; quantity: number; notes?: string }>;
+      items: { productId: string; quantity: number; notes?: string }[];
       notes?: string;
       deliveryLocation?: string;
     }) =>
@@ -158,11 +158,13 @@ export const api = {
     byIds: (ids: string[], organizationId: string) =>
       fetchAPI<{
         ok: boolean;
-        stocks: Array<{
-          id: string;
-          currentStock: number;
-          inventoryEnabled: boolean;
-        }>;
+        stocks: [
+          {
+            id: string;
+            currentStock: number;
+            inventoryEnabled: boolean;
+          },
+        ];
       }>("/products/stock", {
         params: { ids: ids.join(","), organizationId },
       }),

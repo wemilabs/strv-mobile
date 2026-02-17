@@ -34,11 +34,13 @@ type CartActions = {
   getTotalPrice: () => number;
   getItemCount: () => number;
   refreshStock: (
-    stocks: Array<{
-      id: string;
-      currentStock: number;
-      inventoryEnabled: boolean;
-    }>,
+    stocks: [
+      {
+        id: string;
+        currentStock: number;
+        inventoryEnabled: boolean;
+      },
+    ],
   ) => void;
 };
 

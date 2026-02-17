@@ -298,6 +298,7 @@ export function ProfilePanel({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    paddingHorizontal: 20,
   },
   loadingContainer: {
     flex: 1,
@@ -308,7 +309,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    paddingHorizontal: 40,
   },
   notSignedInTitle: {
     fontSize: 22,
@@ -334,7 +334,6 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   header: {
-    paddingHorizontal: 20,
     paddingBottom: 10,
   },
   headerContent: {
@@ -395,7 +394,6 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
   section: {
-    paddingHorizontal: 20,
     marginTop: 24,
   },
   sectionTitle: {
