@@ -29,7 +29,7 @@ export default function ExploreScreen() {
             fontFamily: Fonts.rounded,
           }}
         >
-          Explore
+          Search
         </ThemedText>
       </ThemedView>
       <ThemedText>
@@ -40,7 +40,7 @@ export default function ExploreScreen() {
           This app has two screens:{" "}
           <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText>{" "}
           and{" "}
-          <ThemedText type="defaultSemiBold">app/(tabs)/explore.tsx</ThemedText>
+          <ThemedText type="defaultSemiBold">app/(tabs)/search.tsx</ThemedText>
         </ThemedText>
         <ThemedText>
           The layout file in{" "}

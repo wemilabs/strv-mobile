@@ -140,8 +140,8 @@ export default function RootLayout() {
                 headerBlurEffect: "none",
                 headerShadowVisible: false,
 
-                // These header functions might be unecessary once we'll update to Expo SDK 55
-                // As they'll recommend to use the commented below Stack.Toolbar and Stack.Toolbar.Button
+                // These header functions might be replaced with Stack.Toolbar and Stack.Toolbar.Button
+                // As recommended in the latest Expo SDK 55
                 headerLeft: () => (
                   <Pressable
                     onPress={toggleProfileSidebar}
@@ -186,6 +186,7 @@ export default function RootLayout() {
                         color={headerIconColor}
                         style={{ transform: [{ translateX: 4 }] }}
                       />
+
                       {Number(badge) < 1 ? null : (
                         <View
                           style={{
