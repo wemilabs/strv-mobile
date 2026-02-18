@@ -1,6 +1,7 @@
 import type {
   FeaturedResponse,
   MerchantDetail,
+  Merchant,
   MerchantsResponse,
   OrderDetail,
   OrderListItem,
@@ -82,6 +83,20 @@ async function fetchAPI<T>(
 }
 
 export const api = {
+  search: (params?: {
+    q?: string;
+    tab?: "all" | "stores" | "products";
+    category?: string;
+    organizationId?: string;
+    sortBy?: "newest" | "oldest" | "price_low" | "price_high" | "popular";
+  }) =>
+    fetchAPI<{
+      merchants: Merchant[];
+      products: Product[];
+      totalMerchants?: number;
+      totalProducts?: number;
+    }>("/search", { params }),
+
   orders: {
     list: () =>
       fetchAPI<{

@@ -162,3 +162,5 @@ export type OrderDetail = OrderListItem & {
     image: string | null;
   };
 };
+
+export type PickerMode = "category" | "sort" | "merchant";

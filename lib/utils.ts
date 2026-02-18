@@ -1,3 +1,7 @@
+import { ProductCategory } from "@/types";
+import { CATEGORIES, SORT_OPTIONS } from "./constants";
+import { SortBy } from "./search-params";
+
 export const formatPrice = (price: number) => {
   return new Intl.NumberFormat("en-RW", {
     style: "currency",
@@ -34,4 +38,42 @@ export function calculateOrderFees(baseAmount: number) {
     totalFee,
     totalAmount,
   };
+}
+
+export function labelForCategory(category: ProductCategory) {
+  return CATEGORIES.find((c) => c.id === category)?.label ?? category;
+}
+
+export function labelForSort(sortBy: SortBy) {
+  return SORT_OPTIONS.find((o) => o.id === sortBy)?.label ?? sortBy;
+}
+
+function hashStringToSeed(value: string) {
+  let hash = 2166136261;
+  for (let i = 0; i < value.length; i++) {
+    hash ^= value.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+  return hash >>> 0;
+}
+
+function mulberry32(seed: number) {
+  return function next() {
+    let t = (seed += 0x6d2b79f5);
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+export function seededShuffle<T>(items: T[], seedInput: string): T[] {
+  const rng = mulberry32(hashStringToSeed(seedInput));
+  const out = items.slice();
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    const tmp = out[i];
+    out[i] = out[j];
+    out[j] = tmp;
+  }
+  return out;
 }
