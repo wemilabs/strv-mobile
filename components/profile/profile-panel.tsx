@@ -254,6 +254,25 @@ export function ProfilePanel({
               styles.menuItem,
               { borderBottomColor: Colors[colorScheme].icon + "20" },
             ]}
+            onPress={() => handlePush("/preferences")}
+          >
+            <IconSymbol
+              name="bookmark.fill"
+              size={22}
+              color={Colors[colorScheme].icon}
+            />
+            <ThemedText style={styles.menuItemText}>Preferences</ThemedText>
+            <IconSymbol
+              name="chevron.right"
+              size={16}
+              color={Colors[colorScheme].icon}
+            />
+          </Pressable>
+          <Pressable
+            style={[
+              styles.menuItem,
+              { borderBottomColor: Colors[colorScheme].icon + "20" },
+            ]}
             onPress={() => handlePush("/help-support")}
           >
             <IconSymbol
@@ -312,7 +331,7 @@ const styles = StyleSheet.create({
   },
   notSignedInTitle: {
     fontSize: 22,
-    fontWeight: "600",
+    fontWeight: 700,
     marginTop: 20,
     textAlign: "center",
   },
@@ -331,7 +350,7 @@ const styles = StyleSheet.create({
   signInButtonText: {
     color: "#fff",
     fontSize: 16,
-    fontWeight: "600",
+    fontWeight: 700,
   },
   header: {
     paddingBottom: 10,
@@ -357,7 +376,7 @@ const styles = StyleSheet.create({
   },
   avatarInitial: {
     fontSize: 24,
-    fontWeight: "600",
+    fontWeight: 700,
     color: "#fff",
   },
   userInfo: {
@@ -367,7 +386,7 @@ const styles = StyleSheet.create({
   },
   userName: {
     fontSize: 20,
-    fontWeight: "600",
+    fontWeight: 700,
     marginTop: 16,
   },
   userEmail: {
@@ -387,18 +406,18 @@ const styles = StyleSheet.create({
   },
   statValue: {
     fontSize: 16,
-    fontWeight: "700",
+    fontWeight: 700,
   },
   statLabel: {
     fontSize: 14,
     opacity: 0.7,
   },
   section: {
-    marginTop: 24,
+    marginTop: 36,
   },
   sectionTitle: {
-    fontSize: 13,
-    fontWeight: "600",
+    fontSize: 12,
+    fontWeight: 600,
     opacity: 0.5,
     textTransform: "uppercase",
     marginBottom: 12,
@@ -412,6 +431,7 @@ const styles = StyleSheet.create({
   menuItemText: {
     flex: 1,
     fontSize: 16,
+    fontWeight: 700,
     marginLeft: 14,
   },
   signOutButton: {
@@ -428,6 +448,6 @@ const styles = StyleSheet.create({
   signOutText: {
     color: "#ff4444",
     fontSize: 16,
-    fontWeight: "600",
+    fontWeight: 700,
   },
 });

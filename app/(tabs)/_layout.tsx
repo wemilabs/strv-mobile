@@ -11,7 +11,7 @@ export default function TabLayout() {
         <Icon sf="house.fill" drawable="ic_menu_home" />
         <Label>Home</Label>
       </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="explore" role="search">
+      <NativeTabs.Trigger name="search" role="search">
         <Icon sf="magnifyingglass" drawable="ic_menu_search" />
         <Label>Search</Label>
       </NativeTabs.Trigger>

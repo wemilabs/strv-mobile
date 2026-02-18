@@ -76,8 +76,6 @@ export function CategorySelector({
   onSelectionChange,
   minSelection = 1,
 }: CategorySelectorProps) {
-  const colorScheme = useColorScheme() ?? "light";
-
   const toggleCategory = (categoryId: ProductCategory) => {
     if (selectedCategories.includes(categoryId)) {
       if (selectedCategories.length > minSelection) {
