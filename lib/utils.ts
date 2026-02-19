@@ -10,6 +10,17 @@ export const formatPrice = (price: number) => {
   }).format(price);
 };
 
+export function formatMoney(value: string) {
+  const num = Number(value);
+  return Number.isFinite(num) ? formatPrice(num) : value;
+}
+
+export function formatDate(value: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toLocaleDateString();
+}
+
 export const TRANSACTION_FEES = {
   PAYPACK_CASHIN_RATE: 0.03,
   PAYPACK_CASHOUT_RATE: 0.03,

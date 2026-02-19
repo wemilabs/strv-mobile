@@ -8,8 +8,7 @@ import { useColorScheme } from "@/hooks/use-color-scheme";
 
 export default function HelpSupportScreen() {
   const colorScheme = useColorScheme() ?? "light";
-  const iconColor = Colors[colorScheme].icon;
-  const tint = Colors[colorScheme].tint;
+  const { icon: iconColor, tint } = Colors[colorScheme];
 
   const handleOpenFeedback = () => {
     Linking.openURL("https://starva.shop/feedback");
@@ -53,26 +52,23 @@ export default function HelpSupportScreen() {
         <View style={styles.actions}>
           <Pressable
             style={[
-              styles.primaryButton,
+              styles.footerButton,
               { backgroundColor: tint, borderColor: tint },
             ]}
             onPress={handleOpenFeedback}
           >
             <Ionicons name="chatbox-ellipses-outline" size={18} color="#fff" />
-            <ThemedText style={styles.primaryButtonText}>
+            <ThemedText style={[styles.footerButtonText, { color: "#fff" }]}>
               Send feedback
             </ThemedText>
           </Pressable>
 
           <Pressable
-            style={[
-              styles.secondaryButton,
-              { borderColor: Colors[colorScheme].icon + "25" },
-            ]}
+            style={[styles.footerButton, { borderColor: iconColor + "25" }]}
             onPress={handleOpenWhatsApp}
           >
             <Ionicons name="logo-whatsapp" size={18} color={iconColor} />
-            <ThemedText style={styles.secondaryButtonText}>
+            <ThemedText style={styles.footerButtonText}>
               Chat on WhatsApp
             </ThemedText>
           </Pressable>
@@ -129,7 +125,7 @@ const styles = StyleSheet.create({
     width: "100%",
     gap: 10,
   },
-  primaryButton: {
+  footerButton: {
     height: 54,
     borderRadius: 16,
     borderCurve: "continuous",
@@ -139,22 +135,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 10,
   },
-  primaryButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "700",
-  },
-  secondaryButton: {
-    height: 54,
-    borderRadius: 16,
-    borderCurve: "continuous",
-    borderWidth: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    flexDirection: "row",
-    gap: 10,
-  },
-  secondaryButtonText: {
+  footerButtonText: {
     fontSize: 16,
     fontWeight: "700",
   },

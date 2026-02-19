@@ -8,8 +8,7 @@ import { useColorScheme } from "@/hooks/use-color-scheme";
 
 export default function PaymentMethodsScreen() {
   const colorScheme = useColorScheme() ?? "light";
-  const iconColor = Colors[colorScheme].icon;
-  const tint = Colors[colorScheme].tint;
+  const { icon: iconColor, tint } = Colors[colorScheme];
 
   return (
     <ThemedView style={styles.container}>
@@ -46,30 +45,25 @@ export default function PaymentMethodsScreen() {
         <View style={styles.actions}>
           <View
             style={[
-              styles.primaryButton,
+              styles.footerButton,
               { backgroundColor: tint, borderColor: tint },
             ]}
           >
             <Ionicons name="wallet-outline" size={18} color="#fff" />
-            <ThemedText style={styles.primaryButtonText}>
+            <ThemedText style={[styles.footerButtonText, { color: "#fff" }]}>
               Set up mobile money
             </ThemedText>
           </View>
 
           <View
-            style={[
-              styles.secondaryButton,
-              { borderColor: Colors[colorScheme].icon + "25" },
-            ]}
+            style={[styles.footerButton, { borderColor: iconColor + "25" }]}
           >
             <Ionicons
               name="information-circle-outline"
               size={18}
               color={iconColor}
             />
-            <ThemedText style={styles.secondaryButtonText}>
-              Learn more
-            </ThemedText>
+            <ThemedText style={styles.footerButtonText}>Learn more</ThemedText>
           </View>
         </View>
       </View>
@@ -124,7 +118,7 @@ const styles = StyleSheet.create({
     width: "100%",
     gap: 10,
   },
-  primaryButton: {
+  footerButton: {
     height: 54,
     borderRadius: 16,
     borderCurve: "continuous",
@@ -134,22 +128,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 10,
   },
-  primaryButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "700",
-  },
-  secondaryButton: {
-    height: 54,
-    borderRadius: 16,
-    borderCurve: "continuous",
-    borderWidth: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    flexDirection: "row",
-    gap: 10,
-  },
-  secondaryButtonText: {
+  footerButtonText: {
     fontSize: 16,
     fontWeight: "700",
   },

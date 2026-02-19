@@ -23,19 +23,9 @@ import { OrderStatusBadge } from "@/components/orders/order-status-badge";
 import { Colors, Fonts } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { api } from "@/lib/api";
-import { formatPrice } from "@/lib/utils";
+import { formatDate, formatMoney } from "@/lib/utils";
 import type { OrderDetail } from "@/types";
-
-function formatOrderDate(value: string) {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "";
-  return date.toLocaleString();
-}
-
-function formatMoney(value: string) {
-  const num = Number(value);
-  return Number.isFinite(num) ? formatPrice(num) : value;
-}
+import { Ionicons } from "@expo/vector-icons";
 
 function ItemRow({ item }: { item: OrderDetail["orderItems"][number] }) {
   return (
@@ -69,6 +59,8 @@ export default function OrderDetailScreen() {
   >("idle");
   const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const { background, icon: iconColor, text, tint } = Colors[colorScheme];
 
   const { data, isLoading, isFetching, refetch, error } = useQuery({
     queryKey: ["order", id],
@@ -215,7 +207,7 @@ export default function OrderDetailScreen() {
               ) : null}
             </View>
             <ThemedText style={styles.metaText} numberOfLines={1}>
-              {formatOrderDate(order.createdAt)}
+              {formatDate(order.createdAt)}
             </ThemedText>
           </View>
         ) : null}
@@ -223,7 +215,7 @@ export default function OrderDetailScreen() {
 
       {isLoading ? (
         <View style={styles.centered}>
-          <ActivityIndicator size="large" color={Colors[colorScheme].tint} />
+          <ActivityIndicator size="large" color={tint} />
         </View>
       ) : error || !order ? (
         <View style={styles.centered}>
@@ -246,19 +238,14 @@ export default function OrderDetailScreen() {
               <RefreshControl
                 refreshing={isFetching}
                 onRefresh={() => refetch()}
-                tintColor={Colors[colorScheme].tint}
+                tintColor={tint}
               />
             }
             ListHeaderComponent={
               <View style={styles.summaryCard}>
                 <View style={styles.summaryRow}>
                   <ThemedText style={styles.summaryLabel}>Total</ThemedText>
-                  <ThemedText
-                    style={[
-                      styles.summaryValue,
-                      { color: Colors[colorScheme].tint },
-                    ]}
-                  >
+                  <ThemedText style={[styles.summaryValue, { color: tint }]}>
                     {formatMoney(order.totalPrice)}
                   </ThemedText>
                 </View>
@@ -286,7 +273,7 @@ export default function OrderDetailScreen() {
                 <View
                   style={[
                     styles.divider,
-                    { backgroundColor: Colors[colorScheme].icon + "15" },
+                    { backgroundColor: iconColor + "15" },
                   ]}
                 />
 
@@ -300,19 +287,18 @@ export default function OrderDetailScreen() {
               style={[
                 styles.footer,
                 {
-                  backgroundColor: Colors[colorScheme].background,
-                  borderTopColor: Colors[colorScheme].icon + "15",
-                  paddingBottom: 36 + insets.bottom,
+                  backgroundColor: background,
+                  borderTopColor: iconColor + "15",
                 },
               ]}
             >
               {canPay && (
                 <Pressable
-                  style={({ pressed }) => [
-                    styles.footerPrimaryButton,
+                  style={[
+                    styles.footerButton,
                     {
-                      backgroundColor: Colors[colorScheme].tint,
-                      opacity: pressed ? 0.85 : 1,
+                      backgroundColor: tint,
+                      borderColor: tint,
                     },
                   ]}
                   onPress={() => {
@@ -320,21 +306,29 @@ export default function OrderDetailScreen() {
                     setPayModalOpen(true);
                   }}
                 >
-                  <ThemedText style={styles.footerPrimaryButtonText}>
-                    Pay
+                  <Ionicons name="wallet-outline" size={18} color="#fff" />
+                  <ThemedText
+                    style={[styles.footerButtonText, { color: "#fff" }]}
+                  >
+                    Pay {formatMoney(order.totalPrice)}
                   </ThemedText>
                 </Pressable>
               )}
 
               {canCancel && (
                 <Pressable
-                  style={({ pressed }) => [
-                    styles.footerDestructiveButton,
-                    { opacity: pressed ? 0.85 : 1 },
+                  style={[
+                    styles.footerButton,
+                    { borderColor: iconColor + "25" },
                   ]}
                   onPress={handleCancelOrder}
                 >
-                  <ThemedText style={styles.footerPrimaryButtonText}>
+                  <Ionicons
+                    name="close-circle-outline"
+                    size={18}
+                    color={iconColor}
+                  />
+                  <ThemedText style={styles.footerButtonText}>
                     Cancel Order
                   </ThemedText>
                 </Pressable>
@@ -361,12 +355,7 @@ export default function OrderDetailScreen() {
               style={styles.modalOverlay}
               behavior={Platform.OS === "ios" ? "padding" : undefined}
             >
-              <View
-                style={[
-                  styles.modalCard,
-                  { backgroundColor: Colors[colorScheme].background },
-                ]}
-              >
+              <View style={[styles.modalCard, { backgroundColor: background }]}>
                 <ScrollView
                   bounces={false}
                   keyboardShouldPersistTaps="handled"
@@ -381,12 +370,7 @@ export default function OrderDetailScreen() {
 
                   <View style={styles.totalRow}>
                     <ThemedText style={styles.totalLabel}>Total</ThemedText>
-                    <ThemedText
-                      style={[
-                        styles.totalValue,
-                        { color: Colors[colorScheme].tint },
-                      ]}
-                    >
+                    <ThemedText style={[styles.totalValue, { color: tint }]}>
                       {order ? formatMoney(order.totalPrice) : ""}
                     </ThemedText>
                   </View>
@@ -396,8 +380,8 @@ export default function OrderDetailScreen() {
                       style={[
                         styles.phonePrefix,
                         {
-                          borderColor: Colors[colorScheme].icon + "25",
-                          backgroundColor: Colors[colorScheme].icon + "10",
+                          borderColor: iconColor + "25",
+                          backgroundColor: iconColor + "10",
                         },
                       ]}
                     >
@@ -418,11 +402,11 @@ export default function OrderDetailScreen() {
                       style={[
                         styles.phoneInput,
                         {
-                          borderColor: Colors[colorScheme].icon + "25",
-                          color: Colors[colorScheme].text,
+                          borderColor: iconColor + "25",
+                          color: text,
                         },
                       ]}
-                      placeholderTextColor={Colors[colorScheme].icon}
+                      placeholderTextColor={iconColor}
                     />
                   </View>
 
@@ -431,12 +415,7 @@ export default function OrderDetailScreen() {
                       Waiting for approval on your phone...
                     </ThemedText>
                   ) : paymentStatus === "success" ? (
-                    <ThemedText
-                      style={[
-                        styles.statusText,
-                        { color: Colors[colorScheme].tint },
-                      ]}
-                    >
+                    <ThemedText style={[styles.statusText, { color: tint }]}>
                       Payment successful.
                     </ThemedText>
                   ) : paymentStatus === "failed" ? (
@@ -459,15 +438,14 @@ export default function OrderDetailScreen() {
                         }
                         setPayModalOpen(false);
                       }}
-                      style={({ pressed }) => [
+                      style={[
                         styles.secondaryButton,
                         {
-                          borderColor: Colors[colorScheme].icon + "25",
-                          opacity: pressed ? 0.85 : 1,
+                          borderColor: iconColor + "25",
                         },
                       ]}
                     >
-                      <ThemedText style={styles.secondaryButtonText}>
+                      <ThemedText style={styles.footerButtonText}>
                         {paymentStatus === "polling" ? "Close" : "Cancel"}
                       </ThemedText>
                     </Pressable>
@@ -479,30 +457,36 @@ export default function OrderDetailScreen() {
                         paymentStatus === "success" ||
                         phone.replace(/\D/g, "").length < 9
                       }
-                      style={({ pressed }) => [
-                        styles.footerPrimaryButton,
+                      style={[
+                        styles.secondaryButton,
                         {
-                          backgroundColor: Colors[colorScheme].tint,
+                          backgroundColor: tint,
+                          borderColor: tint,
                           opacity:
                             paymentStatus === "pending" ||
                             paymentStatus === "polling" ||
                             paymentStatus === "success" ||
                             phone.replace(/\D/g, "").length < 9
                               ? 0.5
-                              : pressed
-                                ? 0.85
-                                : 1,
+                              : 1,
                         },
                       ]}
                     >
-                      <ThemedText style={styles.footerPrimaryButtonText}>
-                        {paymentStatus === "pending"
-                          ? "Initiating..."
-                          : paymentStatus === "polling"
-                            ? "Waiting..."
-                            : paymentStatus === "success"
-                              ? "Success"
-                              : "Pay"}
+                      <ThemedText
+                        style={[styles.footerButtonText, { color: "#fff" }]}
+                      >
+                        {(() => {
+                          switch (paymentStatus) {
+                            case "pending":
+                              return "Initiating...";
+                            case "polling":
+                              return "Waiting...";
+                            case "success":
+                              return "Success";
+                            default:
+                              return "Pay";
+                          }
+                        })()}
                       </ThemedText>
                     </Pressable>
                   </View>
@@ -638,31 +622,26 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     padding: 20,
-    paddingBottom: 36,
+    paddingBottom: 24,
     gap: 12,
     borderTopWidth: StyleSheet.hairlineWidth,
     zIndex: 10,
     elevation: 10,
   },
-  footerPrimaryButton: {
+  footerButton: {
     height: 56,
-    borderRadius: 28,
+    borderRadius: 16,
+    borderCurve: "continuous",
+    borderWidth: 1,
     justifyContent: "center",
     alignItems: "center",
+    flexDirection: "row",
+    gap: 10,
   },
-  footerDestructiveButton: {
-    height: 56,
-    borderRadius: 28,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#dc2626",
-  },
-  footerPrimaryButtonText: {
-    color: "#fff",
+  footerButtonText: {
     fontSize: 18,
-    fontWeight: "600",
+    fontWeight: "700",
   },
-
   modalOverlay: {
     flex: 1,
     justifyContent: "flex-end",
@@ -745,13 +724,10 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 12,
     borderRadius: 12,
+    borderCurve: "continuous",
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
     backgroundColor: "transparent",
-  },
-  secondaryButtonText: {
-    fontSize: 15,
-    fontWeight: "700",
   },
 });
