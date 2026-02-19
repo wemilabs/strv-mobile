@@ -17,14 +17,8 @@ import { Colors, Fonts } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { api } from "@/lib/api";
 import { registerScrollToTop } from "@/lib/scroll-to-top";
-import { formatPrice } from "@/lib/utils";
+import { formatDate, formatPrice } from "@/lib/utils";
 import { type OrderListItem } from "@/types";
-
-function formatOrderDate(value: string) {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "";
-  return date.toLocaleDateString();
-}
 
 function OrderRow({
   order,
@@ -59,7 +53,7 @@ function OrderRow({
           {order.organization?.name ?? "Store"}
         </ThemedText>
         <ThemedText style={styles.dateText}>
-          {formatOrderDate(order.createdAt)}
+          {formatDate(order.createdAt)}
         </ThemedText>
       </View>
 

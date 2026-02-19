@@ -27,6 +27,8 @@ export default function ProductDetailScreen() {
   const colorScheme = useColorScheme() ?? "light";
   const { data: session } = useSession();
 
+  const { background, tint } = Colors[colorScheme];
+
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [showAuthPrompt, setShowAuthPrompt] = useState(false);
 
@@ -67,7 +69,7 @@ export default function ProductDetailScreen() {
   if (isLoading) {
     return (
       <ThemedView style={styles.centered}>
-        <ActivityIndicator size="large" color={Colors[colorScheme].tint} />
+        <ActivityIndicator size="large" color={tint} />
       </ThemedView>
     );
   }
@@ -114,7 +116,7 @@ export default function ProductDetailScreen() {
                     style={[
                       styles.thumbnail,
                       selectedImageIndex === index && {
-                        borderColor: Colors[colorScheme].tint,
+                        borderColor: tint,
                         borderWidth: 2,
                       },
                     ]}
@@ -179,10 +181,7 @@ export default function ProductDetailScreen() {
               {product.tags?.map((tag) => (
                 <View
                   key={tag.id}
-                  style={[
-                    styles.tag,
-                    { backgroundColor: Colors[colorScheme].tint + "20" },
-                  ]}
+                  style={[styles.tag, { backgroundColor: tint + "20" }]}
                 >
                   <ThemedText style={styles.tagText}>{tag.name}</ThemedText>
                 </View>
@@ -203,16 +202,10 @@ export default function ProductDetailScreen() {
 
       <Animated.View
         entering={FadeIn.delay(300).duration(300)}
-        style={[
-          styles.footer,
-          { backgroundColor: Colors[colorScheme].background },
-        ]}
+        style={[styles.footer, { backgroundColor: background }]}
       >
         <Pressable
-          style={[
-            styles.addToCartButton,
-            { backgroundColor: Colors[colorScheme].tint },
-          ]}
+          style={[styles.addToCartButton, { backgroundColor: tint }]}
           onPress={handleAddToCart}
         >
           <ThemedText style={styles.addToCartText}>Add to Cart</ThemedText>
@@ -348,13 +341,14 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     padding: 20,
-    paddingBottom: 36,
+    paddingBottom: 24,
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: "rgba(0,0,0,0.1)",
   },
   addToCartButton: {
     height: 56,
-    borderRadius: 28,
+    borderRadius: 16,
+    borderCurve: "continuous",
     justifyContent: "center",
     alignItems: "center",
   },
