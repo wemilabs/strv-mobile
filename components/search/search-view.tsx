@@ -4,6 +4,7 @@ import { useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
+  Modal,
   Pressable,
   StyleSheet,
   TextInput,
@@ -240,7 +241,7 @@ function Section({
   emptyLabel: string;
 }) {
   return (
-    <View style={{ paddingHorizontal: 16, paddingVertical: 8 }}>
+    <View style={{ paddingHorizontal: 16, paddingTop: 8 }}>
       <ThemedText type="defaultSemiBold" style={{ marginBottom: 8 }}>
         {title}
       </ThemedText>
@@ -409,75 +410,79 @@ function PickerOverlay({
         : selectedOrganizationId;
 
   return (
-    <View style={styles.overlayRoot}>
-      <Pressable style={styles.overlayBackdrop} onPress={onClose} />
-      <View
-        style={[
-          styles.overlayPanel,
-          { backgroundColor: bg, borderColor: tint },
-        ]}
-      >
-        <View style={styles.overlayHeader}>
-          <ThemedText type="defaultSemiBold">{title}</ThemedText>
-          <Pressable onPress={onClose}>
-            <ThemedText style={{ color: tint }}>Close</ThemedText>
-          </Pressable>
-        </View>
+    <Modal visible transparent animationType="slide" onRequestClose={onClose}>
+      <View style={styles.overlayRoot}>
+        <Pressable style={styles.overlayBackdrop} onPress={onClose} />
+        <View style={[styles.overlayPanel, { backgroundColor: bg }]}>
+          <View style={styles.overlayHeader}>
+            <ThemedText type="defaultSemiBold">{title}</ThemedText>
+            <Pressable onPress={onClose}>
+              <ThemedText style={{ color: tint }}>Close</ThemedText>
+            </Pressable>
+          </View>
 
-        <FlatList
-          data={data}
-          keyExtractor={(item) => String(item.id)}
-          renderItem={({ item }) => {
-            const isSelected =
-              item.id === "__none__"
-                ? selectedId == null
-                : String(item.id) === String(selectedId);
+          <FlatList
+            data={data}
+            keyExtractor={(item) => String(item.id)}
+            renderItem={({ item }) => {
+              const isSelected =
+                item.id === "__none__"
+                  ? selectedId == null
+                  : String(item.id) === String(selectedId);
 
-            return (
-              <Pressable
-                onPress={() => {
-                  if (mode === "category") {
-                    onSelectCategory(
-                      item.id === "__none__" ? undefined : item.id,
-                    );
-                  } else if (mode === "sort") {
-                    onSelectSort(item.id === "__none__" ? undefined : item.id);
-                  } else {
-                    onSelectMerchant(
-                      item.id === "__none__" ? undefined : item.id,
-                    );
-                  }
-                }}
-                style={[
-                  styles.overlayItem,
-                  {
-                    borderColor: tint,
-                    backgroundColor: isSelected ? tint : "transparent",
-                  },
-                ]}
-              >
-                <ThemedText
-                  style={{
-                    color: isSelected ? "white" : Colors[colorScheme].text,
+              return (
+                <Pressable
+                  onPress={() => {
+                    if (mode === "category") {
+                      onSelectCategory(
+                        item.id === "__none__" ? undefined : item.id,
+                      );
+                    } else if (mode === "sort") {
+                      onSelectSort(
+                        item.id === "__none__" ? undefined : item.id,
+                      );
+                    } else {
+                      onSelectMerchant(
+                        item.id === "__none__" ? undefined : item.id,
+                      );
+                    }
                   }}
+                  style={[
+                    styles.overlayItem,
+                    {
+                      borderColor: tint,
+                      backgroundColor: isSelected ? tint : "transparent",
+                    },
+                  ]}
                 >
-                  {item.label}
-                </ThemedText>
-              </Pressable>
-            );
-          }}
-          ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
-          contentContainerStyle={styles.overlayListContent}
-          showsVerticalScrollIndicator={false}
-        />
+                  <ThemedText
+                    style={{
+                      color: isSelected ? "white" : Colors[colorScheme].text,
+                    }}
+                  >
+                    {item.label}
+                  </ThemedText>
+                </Pressable>
+              );
+            }}
+            ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
+            contentContainerStyle={styles.overlayListContent}
+            showsVerticalScrollIndicator={false}
+          />
+        </View>
       </View>
-    </View>
+    </Modal>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  header: { paddingTop: 120, paddingHorizontal: 16, gap: 12 },
+  header: {
+    paddingTop: 108,
+    paddingHorizontal: 16,
+    paddingBottom: 12,
+    gap: 12,
+  },
   searchBox: {
     borderRadius: 14,
     paddingHorizontal: 12,
@@ -486,7 +491,7 @@ const styles = StyleSheet.create({
     borderColor: "rgba(0,0,0,0.06)",
   },
   searchInput: { fontSize: 16 },
-  tabs: { flexDirection: "row", gap: 10 },
+  tabs: { flexDirection: "row", gap: 10, marginTop: 8 },
   tab: {
     flex: 1,
     borderWidth: 1.5,
@@ -554,7 +559,6 @@ const styles = StyleSheet.create({
   overlayPanel: {
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    borderWidth: 1.5,
     padding: 16,
     maxHeight: "60%",
   },
