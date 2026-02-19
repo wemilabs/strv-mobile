@@ -6,6 +6,7 @@ import {
   FlatList,
   Modal,
   Pressable,
+  Platform,
   StyleSheet,
   TextInput,
   View,
@@ -71,18 +72,20 @@ export function SearchView() {
 
   const listHeader = (
     <View style={styles.header}>
-      <View style={[styles.searchBox, { backgroundColor: bg }]}>
-        <TextInput
-          value={qInput}
-          onChangeText={setQInput}
-          placeholder="Search stores and products"
-          placeholderTextColor={Colors[colorScheme].icon}
-          style={[styles.searchInput, { color: Colors[colorScheme].text }]}
-          autoCapitalize="none"
-          autoCorrect={false}
-          clearButtonMode="while-editing"
-        />
-      </View>
+      {Platform.OS === "ios" ? null : (
+        <View style={[styles.searchBox, { backgroundColor: bg }]}>
+          <TextInput
+            value={qInput}
+            onChangeText={setQInput}
+            placeholder="Search stores and products"
+            placeholderTextColor={Colors[colorScheme].icon}
+            style={[styles.searchInput, { color: Colors[colorScheme].text }]}
+            autoCapitalize="none"
+            autoCorrect={false}
+            clearButtonMode="while-editing"
+          />
+        </View>
+      )}
 
       <View style={styles.tabs}>
         <TabButton id="all" active={tab} onPress={setTab} />
