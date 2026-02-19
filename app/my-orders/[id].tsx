@@ -510,7 +510,7 @@ const styles = StyleSheet.create({
     marginTop: 52,
   },
   orgName: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: "700",
   },
   headerMeta: {
@@ -540,7 +540,7 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
   metaText: {
-    fontSize: 13,
+    fontSize: 14,
     opacity: 0.7,
     flexShrink: 0,
   },
@@ -571,11 +571,11 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   summaryLabel: {
-    fontSize: 14,
+    fontSize: 16,
     opacity: 0.75,
   },
   summaryValue: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: "700",
     flex: 1,
     textAlign: "right",
@@ -586,7 +586,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   itemsTitle: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: "700",
     opacity: 0.6,
     textTransform: "uppercase",
@@ -603,16 +603,16 @@ const styles = StyleSheet.create({
     paddingRight: 12,
   },
   itemName: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: "600",
   },
   itemMeta: {
-    fontSize: 13,
+    fontSize: 14,
     opacity: 0.7,
     marginTop: 4,
   },
   itemSubtotal: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: "700",
   },
 

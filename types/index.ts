@@ -164,3 +164,11 @@ export type OrderDetail = OrderListItem & {
 };
 
 export type PickerMode = "category" | "sort" | "merchant";
+
+export type OrderStatus =
+  | "pending"
+  | "confirmed"
+  | "preparing"
+  | "ready"
+  | "delivered"
+  | "cancelled";

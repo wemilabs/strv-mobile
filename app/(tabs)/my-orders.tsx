@@ -28,6 +28,7 @@ function OrderRow({
   onPress?: () => void;
 }) {
   const colorScheme = useColorScheme() ?? "light";
+  const { background, icon: iconColor, tint } = Colors[colorScheme];
 
   const itemsCount = order.orderItems.reduce(
     (count, item) => count + (item.quantity ?? 0),
@@ -41,8 +42,8 @@ function OrderRow({
       style={[
         styles.orderRow,
         {
-          borderColor: Colors[colorScheme].icon + "15",
-          backgroundColor: Colors[colorScheme].background,
+          borderColor: iconColor + "15",
+          backgroundColor: background,
         },
       ]}
       onPress={onPress}
@@ -69,9 +70,7 @@ function OrderRow({
             </View>
           ) : null}
         </View>
-        <ThemedText
-          style={[styles.totalText, { color: Colors[colorScheme].tint }]}
-        >
+        <ThemedText style={[styles.totalText, { color: tint }]}>
           {Number.isFinite(total) ? formatPrice(total) : order.totalPrice}
         </ThemedText>
       </View>
@@ -81,6 +80,7 @@ function OrderRow({
 
 export default function MyOrdersScreen() {
   const colorScheme = useColorScheme() ?? "light";
+  const { tint } = Colors[colorScheme];
 
   const listRef = useRef<FlatList<OrderListItem> | null>(null);
 
@@ -116,16 +116,13 @@ export default function MyOrdersScreen() {
           <RefreshControl
             refreshing={isFetching && !isLoading}
             onRefresh={() => refetch()}
-            tintColor={Colors[colorScheme].tint}
+            tintColor={tint}
           />
         }
         ListEmptyComponent={
           isLoading ? (
             <View style={styles.centered}>
-              <ActivityIndicator
-                size="large"
-                color={Colors[colorScheme].tint}
-              />
+              <ActivityIndicator size="large" color={tint} />
             </View>
           ) : error ? (
             <View style={styles.centered}>
@@ -194,24 +191,24 @@ const styles = StyleSheet.create({
   },
   paidBadgeText: {
     color: "#fff",
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: "700",
   },
   orgName: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: "600",
     flex: 1,
   },
   dateText: {
-    fontSize: 13,
+    fontSize: 14,
     opacity: 0.65,
   },
   metaText: {
-    fontSize: 13,
+    fontSize: 14,
     opacity: 0.75,
   },
   totalText: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: "700",
   },
 });
