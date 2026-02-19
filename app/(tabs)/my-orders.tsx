@@ -168,7 +168,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: 24,
     paddingTop: 120,
-    // paddingTop: 16,
     gap: 12,
   },
   orderRow: {
