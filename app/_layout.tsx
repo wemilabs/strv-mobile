@@ -591,6 +591,130 @@ export default function RootLayout() {
             />
 
             <Stack.Screen
+              name="merchant-studio/index"
+              options={{
+                headerShown: true,
+                headerTransparent: true,
+                headerTitle: "",
+                headerLeft: () => (
+                  <Pressable
+                    onPress={() => router.back()}
+                    style={{
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Ionicons
+                      name="chevron-back"
+                      size={28}
+                      color={headerIconColor}
+                      style={{ transform: [{ translateX: 2 }] }}
+                    />
+                  </Pressable>
+                ),
+                headerRight: () => (
+                  <Link href="/cart" asChild>
+                    <Pressable
+                      style={{
+                        justifyContent: "center",
+                        alignItems: "center",
+                      }}
+                    >
+                      <AntDesign
+                        name="shopping-cart"
+                        size={26}
+                        color={headerIconColor}
+                        style={{ transform: [{ translateX: 4 }] }}
+                      />
+                      {Number(badge) < 1 ? null : (
+                        <View
+                          style={{
+                            position: "absolute",
+                            top: 2,
+                            right: -8,
+                            minWidth: 16,
+                            height: 16,
+                            borderRadius: 8,
+                            paddingHorizontal: 4,
+                            justifyContent: "center",
+                            alignItems: "center",
+                            backgroundColor: "#ff3b30",
+                          }}
+                        >
+                          <ThemedText style={{ fontSize: 12, lineHeight: 14 }}>
+                            {badge}
+                          </ThemedText>
+                        </View>
+                      )}
+                    </Pressable>
+                  </Link>
+                ),
+              }}
+            />
+
+            <Stack.Screen
+              name="merchant-studio/nested-testing"
+              options={{
+                headerShown: true,
+                headerTransparent: true,
+                headerTitle: "",
+                headerLeft: () => (
+                  <Pressable
+                    onPress={() => router.back()}
+                    style={{
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Ionicons
+                      name="chevron-back"
+                      size={28}
+                      color={headerIconColor}
+                      style={{ transform: [{ translateX: 2 }] }}
+                    />
+                  </Pressable>
+                ),
+                headerRight: () => (
+                  <Link href="/cart" asChild>
+                    <Pressable
+                      style={{
+                        justifyContent: "center",
+                        alignItems: "center",
+                      }}
+                    >
+                      <AntDesign
+                        name="shopping-cart"
+                        size={26}
+                        color={headerIconColor}
+                        style={{ transform: [{ translateX: 4 }] }}
+                      />
+                      {Number(badge) < 1 ? null : (
+                        <View
+                          style={{
+                            position: "absolute",
+                            top: 2,
+                            right: -8,
+                            minWidth: 16,
+                            height: 16,
+                            borderRadius: 8,
+                            paddingHorizontal: 4,
+                            justifyContent: "center",
+                            alignItems: "center",
+                            backgroundColor: "#ff3b30",
+                          }}
+                        >
+                          <ThemedText style={{ fontSize: 12, lineHeight: 14 }}>
+                            {badge}
+                          </ThemedText>
+                        </View>
+                      )}
+                    </Pressable>
+                  </Link>
+                ),
+              }}
+            />
+
+            <Stack.Screen
               name="notifications"
               options={{
                 headerShown: true,

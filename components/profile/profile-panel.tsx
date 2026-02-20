@@ -226,6 +226,25 @@ export function ProfilePanel({
               color={Colors[colorScheme].icon}
             />
           </Pressable>
+          {/* <Pressable
+            style={[
+              styles.menuItem,
+              { borderBottomColor: Colors[colorScheme].icon + "20" },
+            ]}
+            onPress={() => handlePush("/merchant-studio")}
+          >
+            <IconSymbol
+              name="storefront"
+              size={22}
+              color={Colors[colorScheme].icon}
+            />
+            <ThemedText style={styles.menuItemText}>Merchant Studio</ThemedText>
+            <IconSymbol
+              name="chevron.right"
+              size={16}
+              color={Colors[colorScheme].icon}
+            />
+          </Pressable> */}
         </View>
 
         <View style={styles.section}>
