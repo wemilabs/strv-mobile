@@ -1,7 +1,7 @@
 {
   "name": "strv-mobile",
   "main": "expo-router/entry",
-  "version": "0.1.22",
+  "version": "0.1.24",
   "scripts": {
     "start": "expo start --clear",
     "android": "expo run:android",
@@ -22,6 +22,8 @@
     "expo-auth-session": "~7.0.6",
     "expo-constants": "~18.0.13",
     "expo-crypto": "~15.0.5",
+    "expo-dev-client": "~6.0.20",
+    "expo-device": "~8.0.10",
     "expo-font": "~14.0.11",
     "expo-haptics": "~15.0.8",
     "expo-image": "~3.0.11",

@@ -9,7 +9,7 @@ import { Image } from "expo-image";
 import { Link, router, Stack, useSegments } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React, { useEffect, useRef, useState } from "react";
-import { Pressable, View } from "react-native";
+import { Platform, Pressable, View } from "react-native";
 import "react-native-reanimated";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
@@ -19,7 +19,13 @@ import { QueryProvider } from "@/components/providers/query-client-provider";
 import { ThemedText } from "@/components/themed-text";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { useSession } from "@/lib/auth-client";
+import { api } from "@/lib/api";
 import { useCartStore } from "@/lib/cart-store";
+import {
+  addNotificationResponseListener,
+  configureNotifications,
+  registerForPushNotificationsAsync,
+} from "@/lib/push";
 import { scrollToTop } from "@/lib/scroll-to-top";
 import { getPreferences } from "@/stores/preferences";
 
@@ -64,6 +70,39 @@ export default function RootLayout() {
   );
 
   const badge = formatBadge(itemCount);
+
+  useEffect(() => {
+    configureNotifications();
+    const subscription = addNotificationResponseListener((url) => {
+      router.push(url as never);
+    });
+
+    return () => subscription.remove();
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function registerPushToken() {
+      if (!session?.user) return;
+
+      const expoPushToken = await registerForPushNotificationsAsync();
+      if (!expoPushToken || cancelled) return;
+
+      await api.pushTokens.register({
+        expoPushToken,
+        platform: Platform.OS === "ios" ? "ios" : "android",
+      });
+    }
+
+    registerPushToken().catch((error) => {
+      console.error("Push registration failed:", error);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [session?.user?.id]);
 
   useEffect(() => {
     async function checkOnboardingStatus() {
