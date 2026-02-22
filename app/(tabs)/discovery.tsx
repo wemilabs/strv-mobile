@@ -75,7 +75,7 @@ const MerchantCard = function MerchantCard({
     >
       <Image
         source={
-          logo ? { uri: logo } : require("@/assets/images/react-logo.png")
+          logo ? { uri: logo } : require("@/assets/images/placeholder.png")
         }
         style={styles.cardImage}
         contentFit="cover"
@@ -259,8 +259,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: 100,
     paddingTop: 120,
-    // paddingTop: 16,
-    // gap: 12,
   },
   separator: {
     height: 16,

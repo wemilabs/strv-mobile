@@ -41,7 +41,3 @@ app-example
 # generated native folders
 /ios
 /android
-
-# Firebase
-starva-shop-firebase-adminsdk-fbsvc-0161a095fa.json
-google-services.json

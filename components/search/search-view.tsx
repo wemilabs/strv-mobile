@@ -348,7 +348,7 @@ function MerchantRow({ merchant }: { merchant: Merchant }) {
         source={
           merchant.logo
             ? { uri: merchant.logo }
-            : require("@/assets/images/react-logo.png")
+            : require("@/assets/images/placeholder.png")
         }
         style={styles.merchantLogo}
         contentFit="cover"

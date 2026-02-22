@@ -83,6 +83,14 @@ async function fetchAPI<T>(
 }
 
 export const api = {
+  pushTokens: {
+    register: (data: { expoPushToken: string; platform: "ios" | "android" }) =>
+      fetchAPI<{ ok: true }>("/push-tokens", { method: "POST", body: data }),
+
+    unregister: (data: { expoPushToken: string }) =>
+      fetchAPI<{ ok: true }>("/push-tokens", { method: "DELETE", body: data }),
+  },
+
   search: (params?: {
     q?: string;
     tab?: "all" | "stores" | "products";
