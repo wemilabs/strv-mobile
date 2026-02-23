@@ -1,7 +1,7 @@
 {
   "name": "strv-mobile",
   "main": "expo-router/entry",
-  "version": "0.1.24",
+  "version": "0.1.25",
   "scripts": {
     "start": "expo start --clear",
     "android": "expo run:android",
