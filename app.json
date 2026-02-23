@@ -10,7 +10,7 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "dev.expo.strvmobile",
+      "bundleIdentifier": "shop.starva.mobile",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
@@ -24,7 +24,7 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "dev.expo.strvmobile",
+      "package": "shop.starva.mobile",
       "googleServicesFile": "./google-services.json"
     },
     "web": {
