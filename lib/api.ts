@@ -1,7 +1,7 @@
 import type {
   FeaturedResponse,
-  MerchantDetail,
   Merchant,
+  MerchantDetail,
   MerchantsResponse,
   OrderDetail,
   OrderListItem,
@@ -12,6 +12,7 @@ import type {
 
 import { authClient } from "./auth-client";
 
+// const API_BASE = "http://192.168.1.65:3000/api/mobile";
 const API_BASE = "https://starva.shop/api/mobile";
 
 type FetchOptions = {
