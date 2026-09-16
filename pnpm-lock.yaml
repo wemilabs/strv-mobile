@@ -128,9 +128,6 @@ importers:
       react-native-worklets:
         specifier: 0.5.1
         version: 0.5.1(@babel/core@7.28.6)(react-native@0.81.5(@babel/core@7.28.6)(@types/react@19.1.10)(react@19.1.0))(react@19.1.0)
-      root:
-        specifier: git+https://github.com/tanstack/react-query.git
-        version: git+https://github.com/tanstack/react-query.git#ce94b37d6a2b83cb28f9e7e5a1f9fd9959a09119
       zustand:
         specifier: ^5.0.10
         version: 5.0.10(@types/react@19.1.10)(react@19.1.0)(use-sync-external-store@1.6.0(react@19.1.0))
@@ -4162,10 +4159,6 @@ packages:
     resolution: {integrity: sha512-JZkJMZkAGFFPP2YqXZXPbMlMBgsxzE8ILs4lMIX/2o0L9UBw9O/Y3o6wFw/i9YLapcUJWwqbi3kdxIPdC62TIA==}
     deprecated: Rimraf versions prior to v4 are no longer supported
     hasBin: true
-
-  root@git+https://github.com/tanstack/react-query.git#ce94b37d6a2b83cb28f9e7e5a1f9fd9959a09119:
-    resolution: {commit: ce94b37d6a2b83cb28f9e7e5a1f9fd9959a09119, repo: https://github.com/tanstack/react-query.git, type: git}
-    version: 0.0.0
 
   rou3@0.7.12:
     resolution: {integrity: sha512-iFE4hLDuloSWcD7mjdCDhx2bKcIsYbtOTpfH5MHHLSKMOUyjqQXTeZVa289uuwEGEKFoE/BAPbhaU4B774nceg==}
@@ -9456,8 +9449,6 @@ snapshots:
   rimraf@3.0.2:
     dependencies:
       glob: 7.2.3
-
-  root@git+https://github.com/tanstack/react-query.git#ce94b37d6a2b83cb28f9e7e5a1f9fd9959a09119: {}
 
   rou3@0.7.12: {}
 
